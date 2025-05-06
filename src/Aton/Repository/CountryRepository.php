@@ -11,21 +11,23 @@ use App\Core\Database\QueryBuilder;
 
 class CountryRepository extends BaseRepository implements CountryRepositoryInterface
 {
-    public function __construct(Connection              $connection,
+    protected static string $table = "countries";
+
+    public function __construct(Connection      $connection,
+                                QueryBuilder    $queryBuilder,
                                 private CountriesFilter $filter,
-                                private AbstractSorter  $sorter,
-                                private QueryBuilder    $queryBuilder)
+                                private AbstractSorter  $sorter)
     {
-        parent::__construct($connection);
+        parent::__construct($connection, $queryBuilder);
     }
 
     public function create(CreateCountryDTO $data): string
     {
-        $qb = $this->queryBuilder;
+        $qb = $this->queryBuilder();
 
         $this->connection->beginTransaction();
 
-        $sql = $qb->insert('countries', ['country' => $data->getCountry()])
+        $sql = $qb->insert(self::$table, ['country' => $data->getCountry()])
             ->getQuery();
 
         $stmt = $this->connection->prepare($sql);
@@ -38,14 +40,14 @@ class CountryRepository extends BaseRepository implements CountryRepositoryInter
 
     public function update(UpdateCountryDTO $data): string
     {
-        $qb = $this->queryBuilder;
+        $qb = $this->queryBuilder();
 
         $this->connection->beginTransaction();
 
         $country = $this->findOne($data->getId());
         $country['country'] = $data->getCountry() ?? $country['country'];
 
-        $sql = $qb->update('countries', $country)
+        $sql = $qb->update(self::$table, $country)
             ->where('id = :id')
             ->getQuery();
 
@@ -54,48 +56,22 @@ class CountryRepository extends BaseRepository implements CountryRepositoryInter
 
         $this->connection->commit();
 
-        return $this->connection->lastInsertId();
-    }
-
-    public function findAll(): array
-    {
-        $q = $this->queryBuilder->select("*")
-            ->from("countries", 'c')
-            ->where('id = :id')
-            ->getQuery();
-
-        $stmt = $this->connection->query($q);
-
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-    }
-
-    public function findOne(int $id): array
-    {
-        $q = $this->queryBuilder->select("*")
-            ->from("countries", 'c')
-            ->where('id = :id')
-            ->setParameter('id', $id)
-            ->getQuery();
-
-        $stmt = $this->connection->prepare($q);
-
-        $stmt->execute(['id' => $id]);
-
-        return $stmt->fetch(\PDO::FETCH_ASSOC);
+        return true;
     }
 
     public function getAllForView(): array
     {
-        $builder = $this->queryBuilder;
-        $builder->select("*")->from("countries", 'c');
+        $qb = $this->queryBuilder();
 
-        $this->filter->apply($builder);
-        $this->sorter->apply($builder, ['id', 'country']);
+        $qb->select("*")->from(self::$table, 'c');
 
-        $q = $builder->getQuery();
+        $this->filter->apply($qb);
+        $this->sorter->apply($qb, ['id', 'country']);
+
+        $q = $qb->getQuery();
 
         $stmt = $this->connection->prepare($q);
-        $stmt->execute($builder->getQueryParams());
+        $stmt->execute($qb->getQueryParams());
 
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }

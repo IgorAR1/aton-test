@@ -1,5 +1,6 @@
 <?php
 
+use App\Aton\Http\Middlewares\StartSessionMiddleware;
 use App\Aton\ServiceProviders\AppServiceProviders;
 use App\Core\Cache\CacheServiceProvider;
 use App\Core\Event\EventServiceProvider;
@@ -22,6 +23,8 @@ $app->withProviders([
     CacheServiceProvider::class,
     LoggerServiceProvider::class,
     AppServiceProviders::class
+])->withMiddlewares([
+    StartSessionMiddleware::class
 ])->handleRequest($request);
 
 

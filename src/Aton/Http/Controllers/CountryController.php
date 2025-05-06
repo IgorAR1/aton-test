@@ -77,4 +77,11 @@ final class CountryController extends AbstractController
 
         return $this->redirect('/aton/countries');
     }
+
+    public function delete(int $id): ResponseInterface
+    {
+        $this->countryRepository->delete($id);
+
+        return $this->redirect('/aton/countries');
+    }
 }

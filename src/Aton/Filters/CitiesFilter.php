@@ -16,6 +16,7 @@ final class CitiesFilter extends AbstractFilter
     {
         $builder->where("$property LIKE :$property")
             ->setParameter("$property", "$value%");
+        //TODO: добавить все таки джойн
 
 //        $builder->join("countries AS c ON c.id = ct.country_id")
 //            ->where("$property LIKE :$property")

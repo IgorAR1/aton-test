@@ -111,7 +111,7 @@ class Application extends Container implements ApplicationInterface
         return $this;
     }
 
-    public function withMiddleware(array $middlewares): static
+    public function withMiddlewares(array $middlewares): static
     {
         $this->middlewares = $middlewares;
 

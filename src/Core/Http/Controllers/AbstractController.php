@@ -20,8 +20,10 @@ abstract class AbstractController
         return new HtmlResponse($html, $status);
     }
 
-    public function redirect(string $to): ResponseInterface
+    public function redirect(string $to, array $errors = []): ResponseInterface
     {
+        $_SESSION['errors'] = $errors;
+
         return (new Response(302, ['Location' => $to]));
     }
 }

@@ -150,6 +150,15 @@ class QueryBuilder
         return $this;
     }
 
+//    public function findOne(string $table, int $id): string????
+//    {
+//        return $this->select("*")
+//            ->from("cities", 'ct')
+//            ->where('id = :id')
+//            ->setParameter('id', $id)
+//            ->getQuery();
+//    }
+
     public function getQueryParams(): array
     {
         return $this->queryParams;
@@ -182,10 +191,10 @@ class QueryBuilder
     private function buildQueryForSelect(): string
     {
         $sql = 'SELECT ' . implode(', ', $this->queryParts['select'])
-            . ' FROM ' . implode(', ', $this->queryParts['from']);
+            . ' FROM ' . implode(', ', $this->queryParts['from']);//implode??
 
         if (!empty($this->queryParts['join'])) {
-            $sql .= implode(', ', $this->queryParts['join']);
+            $sql .= implode('', $this->queryParts['join']);
         }
 
         if (!empty($this->queryParts['where'])) {
