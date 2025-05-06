@@ -4,7 +4,6 @@ namespace App\Aton\Repository;
 
 use App\Aton\DTOs\CreateCountryDTO;
 use App\Aton\DTOs\UpdateCountryDTO;
-use App\Aton\Entity\Country;
 use App\Aton\Filters\CountriesFilter;
 use App\Aton\Sorters\AbstractSorter;
 use App\Core\Database\Connection;
@@ -12,48 +11,50 @@ use App\Core\Database\QueryBuilder;
 
 class CountryRepository extends BaseRepository implements CountryRepositoryInterface
 {
-    public function __construct(Connection $connection,
+    public function __construct(Connection              $connection,
                                 private CountriesFilter $filter,
-                                private AbstractSorter $sorter,
-                                private QueryBuilder $queryBuilder)
+                                private AbstractSorter  $sorter,
+                                private QueryBuilder    $queryBuilder)
     {
         parent::__construct($connection);
     }
 
-    public function create(CreateCountryDTO $data): Country
+    public function create(CreateCountryDTO $data): string
     {
+        $qb = $this->queryBuilder;
+
         $this->connection->beginTransaction();
 
-        $qb = $this->queryBuilder;
-        $sql = $qb->insert('countries', ['country'])->setParameters(['country' => $data->getCountry()])->getQuery();
+        $sql = $qb->insert('countries', ['country' => $data->getCountry()])
+            ->getQuery();
 
         $stmt = $this->connection->prepare($sql);
         $stmt->execute($qb->getQueryParams());
 
         $this->connection->commit();
 
-        $country = new Country($this->connection->lastInsertId());
-        $country->setCountry($data->country);
-
-        return $country;
+        return $this->connection->lastInsertId();
     }
 
-    public function update(UpdateCountryDTO $data): Country
+    public function update(UpdateCountryDTO $data): string
     {
+        $qb = $this->queryBuilder;
+
         $this->connection->beginTransaction();
 
-        $qb = $this->queryBuilder;
-        $sql = $qb->update('countries', ['country'])->where('id = :id')->setParameters(['country' => $data->getCountry()])->getQuery();
+        $country = $this->findOne($data->getId());
+        $country['country'] = $data->getCountry() ?? $country['country'];
+
+        $sql = $qb->update('countries', $country)
+            ->where('id = :id')
+            ->getQuery();
 
         $stmt = $this->connection->prepare($sql);
         $stmt->execute($qb->getQueryParams());
 
         $this->connection->commit();
 
-        $country = new Country($this->connection->lastInsertId());
-        $country->setCountry($data->country);
-
-        return $country;
+        return $this->connection->lastInsertId();
     }
 
     public function findAll(): array
@@ -65,15 +66,10 @@ class CountryRepository extends BaseRepository implements CountryRepositoryInter
 
         $stmt = $this->connection->query($q);
 
-        $countries = [];
-        foreach ($stmt->fetchAll(\PDO::FETCH_ASSOC) as $row) {
-            $countries[] = $this->hydrateEntity($row);
-        }
-
-        return $countries;
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
-    public function findOne(int $id): ?Country
+    public function findOne(int $id): array
     {
         $q = $this->queryBuilder->select("*")
             ->from("countries", 'c')
@@ -85,7 +81,7 @@ class CountryRepository extends BaseRepository implements CountryRepositoryInter
 
         $stmt->execute(['id' => $id]);
 
-        return $this->hydrateEntity($stmt->fetch(\PDO::FETCH_ASSOC));
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
 
     public function getAllForView(): array
@@ -101,20 +97,6 @@ class CountryRepository extends BaseRepository implements CountryRepositoryInter
         $stmt = $this->connection->prepare($q);
         $stmt->execute($builder->getQueryParams());
 
-        $countries = [];
-        foreach ($stmt->fetchAll(\PDO::FETCH_ASSOC) as $row) {
-            $countries[] = $this->hydrateEntity($row);
-        }
-
-        return $countries;
-    }
-
-    public function hydrateEntity(array|bool $data): ?Country
-    {
-        if ($data){
-            return new Country(...$data);//Через сеттеры офк
-        }
-
-        return null;
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 }

@@ -95,9 +95,23 @@ class QueryBuilder
         return $this;
     }
 
-    public function update(string $table, array $columns, array $params = []): self
+//    public function update(string $table, array $columns, array $params = []): self
+//    {
+//        self::$type = 'UPDATE';
+//
+//        $set = implode(',', array_map(fn($value) => $value . ' = ' . ':' . $value, $columns));
+//
+//        $this->queryParts['update'] = $table . ' SET ' . $set;
+//
+//        $this->setParameters($params);
+//
+//        return $this;
+//    }
+    public function update(string $table, array $params): self
     {
         self::$type = 'UPDATE';
+
+        $columns = array_keys($params);
 
         $set = implode(',', array_map(fn($value) => $value . ' = ' . ':' . $value, $columns));
 
@@ -108,9 +122,12 @@ class QueryBuilder
         return $this;
     }
 
-    public function insert(string $table, array $columns, array $params = []): self
+
+    public function insert(string $table, array $params): self
     {
         self::$type = 'INSERT';
+
+        $columns = array_keys($params);
 
         $formatedColumns = '(' . implode(',', $columns) . ')';
         $values = implode(',', array_map(fn($value) => ':' . $value, $columns));

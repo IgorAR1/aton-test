@@ -3,9 +3,9 @@
 namespace App\Aton\Http\Controllers;
 
 use App\Aton\DTOs\CreateCountryDTO;
+use App\Aton\DTOs\UpdateCountryDTO;
 use App\Aton\Repository\CountryRepositoryInterface;
 use App\Core\Http\Controllers\AbstractController;
-use App\Core\Http\HtmlResponse;
 use App\Core\Validator\ValidatorInterface;
 use App\Core\View\Engine;
 use GuzzleHttp\Psr7\Response;
@@ -14,18 +14,15 @@ use Psr\Http\Message\ServerRequestInterface;
 
 final class CountryController extends AbstractController
 {
-    public function __construct(Engine                               $renderEngine,
+    public function __construct(Engine $renderEngine,
                                 protected CountryRepositoryInterface $countryRepository,
-
-                                private ValidatorInterface           $validator)
+                                private ValidatorInterface $validator)
     {
         parent::__construct($renderEngine);
     }
 
     public function index(): Response
     {
-
-//        $result = $this->queryBuilder->select()->getQuery()->execute();
         $countries = $this->countryRepository->getAllForView();
 
         return $this->render("countries", ['countries' => $countries]);
@@ -41,7 +38,7 @@ final class CountryController extends AbstractController
         $country = $this->countryRepository->findOne($id);
 
         if (!$country) {
-            return $this->render("404",status: 404);
+            return $this->render("404", status: 404);
         }
 
         return $this->render('countries_edit', ['country' => $country]);
@@ -50,7 +47,7 @@ final class CountryController extends AbstractController
     public function store(ServerRequestInterface $request): ResponseInterface
     {
         $errors = $this->validator
-            ->setRules(['country' => ['required', 'notBlank']])
+            ->setRules(['country' => ['required', 'notBlank', 'string']])
             ->validate($request->getParsedBody());
 
         if (count($errors) > 0) {
@@ -61,23 +58,23 @@ final class CountryController extends AbstractController
 
         $this->countryRepository->create($data);
 
-        return $this->render('countries_create');
+        return $this->redirect('/aton/countries');
     }
 
     public function update(int $id, ServerRequestInterface $request): ResponseInterface
     {
         $errors = $this->validator
-            ->setRules(['country' => ['required', 'notBlank']])
+            ->setRules(['country' => ['string']])
             ->validate($request->getParsedBody());
 
         if (count($errors) > 0) {
             return $this->render('countries_create', ['errors' => $errors]);
         }
 
-        $data = new CreateCountryDTO(...$request->getParsedBody());//Дто здесь не нужен
+        $data = new UpdateCountryDTO($id, $request->getParsedBody()['country']);//Дто здесь не нужен
 
-        $this->countryRepository->create($data);
+        $this->countryRepository->update($data);
 
-        return $this->render('countries_create');
+        return $this->redirect('/aton/countries');
     }
 }

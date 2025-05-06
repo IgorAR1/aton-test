@@ -7,6 +7,6 @@ use App\Aton\Entity\Country;
 interface CountryRepositoryInterface
 {
     public function findAll(): array;
-    public function findOne(int $id): ?Country;
+    public function findOne(int $id): array;
     public function getAllForView(): array;
 }

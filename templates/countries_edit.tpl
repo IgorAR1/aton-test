@@ -1,4 +1,4 @@
-<h1>Edit {{ country->country }} </h1>
+<h1>Edit {{ country.country }} </h1>
 
 <form method="post" action="">
     <label>
@@ -9,7 +9,7 @@
             {% endforeach %}
         {% endif %}
 
-        <input type="text" name="country" value="{{ country->country }}">}>
+        <input type="text" name="country" value="{{ country.country }}">
     </label>
-    <input type="submit">
+    <input type="submit" value="Edit">
 </form>
