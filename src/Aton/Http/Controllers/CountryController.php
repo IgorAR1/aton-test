@@ -7,8 +7,9 @@ use App\Aton\DTOs\UpdateCountryDTO;
 use App\Aton\Repository\CountryRepositoryInterface;
 use App\Core\Http\Controllers\AbstractController;
 use App\Core\Validator\ValidatorInterface;
-use App\Core\View\Engine;
+//use App\Core\View\Engine;
 use GuzzleHttp\Psr7\Response;
+use Latte\Engine;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -25,12 +26,12 @@ final class CountryController extends AbstractController
     {
         $countries = $this->countryRepository->getAllForView();
 
-        return $this->render("countries", ['countries' => $countries]);
+        return $this->render("countries.latte", ['countries' => $countries]);
     }
 
     public function create(): ResponseInterface
     {
-        return $this->render('countries_create');
+        return $this->render('countries_create.latte');
     }
 
     public function edit(int $id): ResponseInterface
@@ -41,7 +42,7 @@ final class CountryController extends AbstractController
             return $this->render("404", status: 404);
         }
 
-        return $this->render('countries_edit', ['country' => $country]);
+        return $this->render('countries_edit.latte', ['country' => $country]);
     }
 
     public function store(ServerRequestInterface $request): ResponseInterface
@@ -51,7 +52,7 @@ final class CountryController extends AbstractController
             ->validate($request->getParsedBody());
 
         if (count($errors) > 0) {
-            return $this->render('countries_create', ['errors' => $errors]);
+            return $this->redirect('countries_create', ['errors' => $errors]);
         }
 
         $data = new CreateCountryDTO(...$request->getParsedBody());//Дто здесь не нужен
@@ -68,7 +69,7 @@ final class CountryController extends AbstractController
             ->validate($request->getParsedBody());
 
         if (count($errors) > 0) {
-            return $this->render('countries_create', ['errors' => $errors]);
+            return $this->redirect('countries_create', $errors);
         }
 
         $data = new UpdateCountryDTO($id, $request->getParsedBody()['country']);//Дто здесь не нужен

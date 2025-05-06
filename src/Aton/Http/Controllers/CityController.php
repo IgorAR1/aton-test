@@ -8,8 +8,9 @@ use App\Aton\Repository\CityRepositoryInterface;
 use App\Aton\Repository\CountryRepositoryInterface;
 use App\Core\Http\Controllers\AbstractController;
 use App\Core\Validator\ValidatorInterface;
-use App\Core\View\Engine;
+//use App\Core\View\Engine;
 use GuzzleHttp\Psr7\Response;
+use Latte\Engine;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -27,14 +28,14 @@ final class CityController extends AbstractController
     {
         $cities = $this->cityRepository->getAllForView();
 
-        return $this->render("cities", ['cities' => $cities]);
+        return $this->render("cities.latte", ['cities' => $cities]);
     }
 
     public function create(): ResponseInterface
     {
         $countries = $this->countryRepository->findAll();
 
-        return $this->render('cities_create',['countries' => $countries]);
+        return $this->render('cities_create.latte',['countries' => $countries]);
     }
 
     public function edit(int $id): ResponseInterface
@@ -47,7 +48,7 @@ final class CityController extends AbstractController
 
         $countries = $this->countryRepository->findAll();
 
-        return $this->render('cities_edit', ['city' => $city, 'countries' => $countries]);
+        return $this->render('cities_edit.latte', ['city' => $city, 'countries' => $countries]);
     }
 
     public function store(ServerRequestInterface $request): ResponseInterface
@@ -62,7 +63,7 @@ final class CityController extends AbstractController
             ->validate($request);
 
         if (count($errors) > 0) {
-            return $this->redirect('/aton/cities/create', ['errors' => $errors]);
+            return $this->redirect('/aton/cities/create', $errors);
         }
 
         $data = new CreateCityDTO(...$request);

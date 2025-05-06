@@ -1,2 +1,2 @@
 #!/bin/bash
-sudo docker exec php-blog "$@"
+sudo docker exec php-aton "$@"

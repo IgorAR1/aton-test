@@ -11,8 +11,9 @@ use App\Aton\Repository\CountryRepositoryInterface;
 use App\Aton\Repository\UserRepositoryInterface;
 use App\Core\Http\Controllers\AbstractController;
 use App\Core\Validator\ValidatorInterface;
-use App\Core\View\Engine;
+//use App\Core\View\Engine;
 use GuzzleHttp\Psr7\Response;
+use Latte\Engine;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -30,14 +31,14 @@ final class UserController extends AbstractController
     {
         $users = $this->userRepository->getAllForView();
 
-        return $this->render("users", ['users' => $users]);
+        return $this->render("users.latte", ['users' => $users]);
     }
 
     public function create(): ResponseInterface
     {
         $cities = $this->cityRepository->findAll();
 
-        return $this->render('users_create', ['cities' => $cities]);
+        return $this->render('user_create.latte', ['cities' => $cities]);
     }
 
     public function edit(int $id): ResponseInterface
@@ -45,12 +46,13 @@ final class UserController extends AbstractController
         $user = $this->userRepository->findOne($id);
 
         if (!$user) {
+
             return $this->render("404", status: 404);
         }
 
         $cities = $this->cityRepository->findAll();
 
-        return $this->render('users_edit', ['user' => $user, 'cities' => $cities]);
+        return $this->render('users_edit.latte', ['user' => $user, 'cities' => $cities]);
     }
 
     public function store(ServerRequestInterface $request): ResponseInterface
@@ -89,7 +91,7 @@ final class UserController extends AbstractController
             ->validate($request);
 
         if (count($errors) > 0) {
-            return $this->render('users_create', ['errors' => $errors]);
+            return $this->render('users_create', $errors);
         }
 
         $data = new UpdateUserDTO($id, ...$request);

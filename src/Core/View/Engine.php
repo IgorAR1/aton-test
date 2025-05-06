@@ -30,7 +30,7 @@ class Engine
         $template = str_replace('{% else %}', '<?php else: ?>', $template);
         $template = str_replace('{% endif %}', '<?php endif; ?>', $template);
 
-        $template = preg_replace_callback('/\{\%\s*foreach\s+(\w+)\s+in\s+(\w+)\s*\%\}/', function ($m) {
+        $template = preg_replace_callback('/\{\%\s*foreach\s+(\w+)\s+in\s+(.*?)\s*\%\}/', function ($m) {
             return "<?php foreach (\${$m[2]} as \${$m[1]}): ?>";
         }, $template);
 
@@ -46,7 +46,6 @@ class Engine
 
         extract($args, EXTR_SKIP);
         ob_start();
-//        dd($template);
         eval(' ?>' . $template . '<?php ');
         return ob_get_clean();
     }

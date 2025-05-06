@@ -51,7 +51,7 @@ class Application extends Container implements ApplicationInterface
         $this->bind(Engine::class, function (): Engine {
             $latte = new Engine();
             $latte->setTempDirectory(getcwd() . '/cache');
-            $latte->setLoader(new FileLoader('/var/www/aton/templates'));
+            $latte->setLoader(new FileLoader('/var/www/aton/templates/latte'));
             return $latte;
         });
         $this->bind(Config::class, function (): Config {

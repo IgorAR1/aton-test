@@ -3,8 +3,8 @@
     <label>
         Country:
 
-        {% if isset($errors) %}
-            {% foreach error in errors %}
+        {% if session('errors') %}
+            {% foreach error in session('errors') %}
             <li style="color: red">{{ error }}</li>
             {% endforeach %}
         {% endif %}

@@ -13,3 +13,15 @@
 //        die();
 //    }
 //}
+
+
+if (!function_exists('session')) {
+    function session(string $key): ?array
+    {
+        if (isset($_SESSION[$key])) {
+            return $_SESSION[$key];
+        }
+
+       return null;
+    }
+}

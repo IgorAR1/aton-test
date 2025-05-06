@@ -1,0 +1,20 @@
+<h1>Edit {$city->city}</h1>
+
+<form method="post" action="">
+    <label>
+        City Name:
+        {if isset($session->errors)}
+            <ul>
+                {foreach $session->errors as $error}
+                    <li style="color: red">{$error}</li>
+                {/foreach}
+            </ul>
+        {/if}
+
+        <input type="text" name="city" value="{$city->city}">
+    </label>
+    <br>
+
+
+    <input type="submit" value="Edit">
+</form>

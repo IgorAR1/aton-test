@@ -1,0 +1,70 @@
+<h1>Список городов</h1>
+
+<form id="cityFilterForm" method="get">
+    <label>
+        <input type="checkbox" data-filter="country">
+        Название страны:
+        <input type="text" name="filter[country]" value="{$filter['country'] ?? ''}">
+    </label>
+    <br>
+
+    <label>
+        <input type="checkbox" data-filter="city">
+        Название города:
+        <input type="text" name="filter[city]" value="{$filter['city'] ?? ''}">
+    </label>
+    <br>
+
+    <label>
+        <input type="checkbox" data-filter="id">
+        ID:
+        <input type="text" name="filter[id]" value="{$filter['id'] ?? ''}">
+    </label>
+    <br>
+
+    <select name="sort">
+        <option value="">Без сортировки</option>
+        <option value="id" {if ($sort ?? '') === 'id'}selected{/if}>Сортировать по ID</option>
+        <option value="country" {if ($sort ?? '') === 'country'}selected{/if}>Сортировать по названию страны</option>
+        <option value="city" {if ($sort ?? '') === 'city'}selected{/if}>Сортировать по названию города</option>
+    </select>
+
+    <select name="order">
+        <option value="asc" {if ($order ?? '') === 'asc'}selected{/if}>По возрастанию</option>
+        <option value="desc" {if ($order ?? '') === 'desc'}selected{/if}>По убыванию</option>
+    </select>
+
+    <button type="submit">Фильтровать</button>
+</form>
+
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Название страны</th>
+        <th>Название города</th>
+    </tr>
+    {foreach $cities as $city}
+        <tr>
+            <td>{$city['id']}</td>
+            <td>{$city['country']}</td>
+            <td>{$city['city']}</td>
+        </tr>
+    {/foreach}
+</table>
+
+<script n:syntax="off">
+    document.getElementById('cityFilterForm').addEventListener('submit', function (e) {
+        const form = e.target;
+        const checkboxes = form.querySelectorAll('input[type=checkbox][data-filter]');
+
+        checkboxes.forEach(checkbox => {
+            const fieldName = checkbox.dataset.filter;
+            const input = form.querySelector(`[name="filter[${fieldName}]"]`);
+
+            if (!checkbox.checked) {
+                if (input) input.disabled = true;
+                checkbox.disabled = true;
+            }
+        });
+    });
+</script>

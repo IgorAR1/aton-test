@@ -13,6 +13,7 @@ use App\Aton\Sorters\Sorter;
 use App\Core\Support\ServiceProvider\ServiceProvider;
 use App\Core\Validator\Validator;
 use App\Core\Validator\ValidatorInterface;
+use Latte\Engine;
 
 class AppServiceProviders extends ServiceProvider
 {

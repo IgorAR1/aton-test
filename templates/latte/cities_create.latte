@@ -1,0 +1,25 @@
+<h1>Create city</h1>
+
+<form method="post">
+    <label>
+        Country:
+
+        {if session('errors')}
+            <ul>
+                {foreach session('errors') as $error}
+                    <li style="color: red">{$error}</li>
+                {/foreach}
+            </ul>
+        {/if}
+
+        <input type="text" name="city" placeholder="City">
+
+        <select name="country_id">
+            {foreach $countries as $country}
+                <option value="{$country['id']}">{$country['country']}</option>
+            {/foreach}
+        </select>
+    </label>
+
+    <input type="submit" value="Создать">
+</form>

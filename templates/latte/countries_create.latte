@@ -1,0 +1,19 @@
+<h1>Create country</h1>
+
+<form method="post">
+    <label>
+        Country:
+
+        {if session('errors')}
+            <ul>
+                {foreach session('errors') as $error}
+                    <li style="color: red">{$error}</li>
+                {/foreach}
+            </ul>
+        {/if}
+
+        <input type="text" name="country" placeholder="Country">
+    </label>
+
+    <input type="submit" value="Создать">
+</form>

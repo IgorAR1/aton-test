@@ -3,11 +3,13 @@
 <form method="post">
     <label>
         First name:
-        {% if session('errors')) %}
-            {% foreach error in session('errors') %}
-            <li style="color: red">{{ error }}</li>
-            {% endforeach %}
-        {% endif %}
+        {if session('errors')}
+            <ul>
+                {foreach session('errors') as $error}
+                    <li style="color: red">{$error}</li>
+                {/foreach}
+            </ul>
+        {/if}
         <input type="text" name="first_name" placeholder="Имя">
     </label>
     <br>
@@ -21,9 +23,9 @@
     <label>
         City:
         <select name="city_id">
-            {% foreach city in cities %}
-            <option value="{{ city.id }}">{{ city.city }}</option>
-            {% endforeach %}
+            {foreach $cities as $city}
+                <option value="{$city['id']}">{$city['city']}</option>
+            {/foreach}
         </select>
     </label>
     <br>
