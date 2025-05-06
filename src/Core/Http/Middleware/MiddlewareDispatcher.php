@@ -3,6 +3,8 @@
 namespace App\Core\Http\Middleware;
 
 
+use App\Core\Container\Exceptions\NotFoundContainerException;
+use App\Core\Http\Middleware\Exception\MiddlewareDispatcherException;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use LogicException;
@@ -36,44 +38,54 @@ class MiddlewareDispatcher implements MiddlewareDispatcherInterface
 
     private function resolve(int $index): RequestHandlerInterface
     {
-        if (isset($this->stack[$index])) {
-            return new class(function (ServerRequestInterface $request) use ($index) {
-                $middleware = $this->stack[$index];
+        try {
+            if (isset($this->stack[$index])) {
+                return new class(function (ServerRequestInterface $request) use ($index) {
+                    $middleware = $this->stack[$index];
 
-                if (is_string($middleware)) {
-                    $middleware = $this->container->make($middleware);
-                }
-                if ($middleware instanceof MiddlewareInterface) {
-                    return $middleware->process($request, $this->resolve($index + 1));
-                }
-                if (is_callable($middleware)) {
-                    return $middleware($request, $this->resolve($index + 1));
-                }
+                    try {
+                        if (is_string($middleware)) {
+                            $middleware = $this->container->make($middleware);
+                        }
+                    } catch (NotFoundContainerException $e) {
+                        throw new MiddlewareDispatcherException('Middleware does not exists.');
+                    }
 
-                throw new LogicException("Unsupported middleware type at index $index");///TODO: гавно пееделать
-            }) implements RequestHandlerInterface {
-                public function __construct(readonly \Closure $callback)
-                {
-                }
+                    if ($middleware instanceof MiddlewareInterface) {
+                        return $middleware->process($request, $this->resolve($index + 1));
+                    }
+                    if (is_callable($middleware)) {
+                        return $middleware($request, $this->resolve($index + 1));
+                    }
 
+                    throw new MiddlewareDispatcherException("Unsupported middleware of type" . get_debug_type($middleware));
+                }) implements RequestHandlerInterface {
+                    public function __construct(readonly \Closure $callback)
+                    {
+                    }
+
+                    public function handle(ServerRequestInterface $request): ResponseInterface
+                    {
+                        return ($this->callback)($request);
+                    }
+
+                    public function __invoke(ServerRequestInterface $request)
+                    {
+                        return ($this->callback)($request);
+                    }
+                };
+            }
+
+            return new class implements RequestHandlerInterface {///Если последний элемент цепи не дает респонс - исключение потому что блять если выходишь за массив он нулл возвращает
                 public function handle(ServerRequestInterface $request): ResponseInterface
                 {
-                    return ($this->callback)($request);
-                }
-
-                public function __invoke(ServerRequestInterface $request)
-                {
-                    return ($this->callback)($request);
+                    throw new LogicException("Unresolved request: middleware stack exhausted with no result");
                 }
             };
+        } catch (NotFoundContainerException $e) {
+            throw new MiddlewareDispatcherException('Middleware not exists.');
         }
 
-        return new class implements RequestHandlerInterface {///Если последний элемент цепи не дает респонс - исключение потому что блять если выходишь за массив он нулл возвращает
-            public function handle(ServerRequestInterface $request): ResponseInterface
-            {
-                throw new LogicException("Unresolved request: middleware stack exhausted with no result");
-            }
-        };
     }
 
     public function addMiddleware(callable|MiddlewareInterface|string|array $middleware): void

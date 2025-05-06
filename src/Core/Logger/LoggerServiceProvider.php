@@ -11,7 +11,6 @@ use Psr\Log\LoggerInterface;
 
 class LoggerServiceProvider extends ServiceProvider
 {
-
     public function register(): void
     {
         $this->application->bind(LogHandlerInterface::class, fn() => $this->application->makeWith(StreamLogHandler::class, ['path' => $this->application->config('logs.default.path')]));

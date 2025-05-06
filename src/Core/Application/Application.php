@@ -10,7 +10,7 @@ use App\Core\Container\Resolvers\ParametersResolverInterface;
 use App\Core\Event\EventDispatcher;
 use App\Core\Event\ListenerProviderComposite;
 use App\Core\Exception\ErrorHandler;
-use App\Core\Http\Middleware\NotFoundErrorMiddleware;
+use App\Core\Http\Middleware\NotFoundMiddlewareException;
 use App\Core\Kernel\HttpKernel;
 use App\Core\Logger\Handlers\LogHandlerInterface;
 use App\Core\Logger\Handlers\StreamLogHandler;
@@ -51,8 +51,11 @@ class Application extends Container implements ApplicationInterface
         $this->bind(Engine::class, function (): Engine {
             $latte = new Engine();
             $latte->setTempDirectory(getcwd() . '/cache');
-            $latte->setLoader(new FileLoader('/var/www/blog/templates'));
+            $latte->setLoader(new FileLoader('/var/www/aton/templates'));
             return $latte;
+        });
+        $this->bind(Config::class, function (): Config {
+            return $this->config;
         });
     }
 
@@ -68,7 +71,7 @@ class Application extends Container implements ApplicationInterface
 
     private function prepareConfig(): void
     {
-        $this->configPath = "/var/www/blog/src";
+        $this->configPath = "/var/www/aton/src";
 
         $parameters = [];
 
@@ -89,6 +92,10 @@ class Application extends Container implements ApplicationInterface
         return $this->config->get($key);
     }
 
+    public function getConfig(): Config
+    {
+        return $this->config;
+    }
     private function registerProviders(): void
     {
         foreach ($this->serviceProviders as $serviceProvider) {

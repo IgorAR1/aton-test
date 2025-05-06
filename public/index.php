@@ -1,5 +1,6 @@
 <?php
 
+use App\Aton\ServiceProviders\AppServiceProviders;
 use App\Core\Cache\CacheServiceProvider;
 use App\Core\Event\EventServiceProvider;
 use App\Core\Logger\LoggerServiceProvider;
@@ -13,12 +14,14 @@ $dotenv->load();
 
 $app = new \App\Core\Application\Application();
 $request = \GuzzleHttp\Psr7\ServerRequest::fromGlobals();
+
 $app->withProviders([
     RouteServiceProvider::class,
     CacheServiceProvider::class,
     EventServiceProvider::class,
     CacheServiceProvider::class,
     LoggerServiceProvider::class,
+    AppServiceProviders::class
 ])->handleRequest($request);
 
 

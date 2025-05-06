@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Core\Http\Middleware\testMiddleware;
+namespace App\Aton\Http\Middlewares;
 
 use App\Core\Http\Middleware\MiddlewareInterface;
 use App\Core\Http\Middleware\RequestHandlerInterface;
@@ -9,8 +9,11 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class Middleware1 implements MiddlewareInterface
 {
+
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        return $handler->handle($request);
+       $response = $handler->handle($request);
+
+       return $response;
     }
 }

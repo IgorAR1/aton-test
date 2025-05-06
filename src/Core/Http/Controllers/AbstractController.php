@@ -3,17 +3,17 @@
 namespace App\Core\Http\Controllers;
 
 use App\Core\Http\HtmlResponse;
-use Latte\Engine;
+use App\Core\View\Engine;
 
 abstract class AbstractController
 {
     public function __construct(protected Engine $renderEngine)
     {}
 
-    protected function render(string $view, array $params = []): HtmlResponse
+    protected function render(string $view, array $args = [], int $status = 200): HtmlResponse
     {
-        $html = $this->renderEngine->renderToString($view, $params);
+        $html = $this->renderEngine->renderToString($view, $args);
 
-        return new HtmlResponse($html);
+        return new HtmlResponse($html,$status);
     }
 }

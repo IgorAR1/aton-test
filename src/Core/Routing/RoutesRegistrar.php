@@ -17,12 +17,12 @@ class RoutesRegistrar
 
     private function getApiRoutes(): \Closure
     {
-        return require '/var/www/blog/routes/api.php';
+        return require '/var/www/aton/routes/api.php';
     }
 
     private function getWebRoutes(): \Closure
     {
-        return require '/var/www/blog/routes/web.php';
+        return require '/var/www/aton/routes/web.php';
     }
 
     ///Middleware for api and web

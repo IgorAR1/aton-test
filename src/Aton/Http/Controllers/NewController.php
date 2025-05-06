@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Blog\Http\Controllers;
+namespace App\Aton\Http\Controllers;
 
 use App\Core\Http\JsonResponse;
 

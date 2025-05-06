@@ -27,7 +27,8 @@
         "psr/cache": "^3.0",
         "ext-redis": "*",
         "latte/latte": "^3.0",
-        "guzzlehttp/psr7": "^2.7"
+        "guzzlehttp/psr7": "^2.7",
+      "ext-pdo": "*"
     },
     "require-dev": {
         "symfony/var-dumper": "^7.2",
