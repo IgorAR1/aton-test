@@ -7,6 +7,10 @@ class Validator implements ValidatorInterface
     private array $errors = [];
     private array $rules = [];
     private array $data = [];
+    /**
+     * @var true
+     */
+    private bool $sometimes = false;
 
     public function setRules(array $rules): static
     {
@@ -38,6 +42,7 @@ class Validator implements ValidatorInterface
                     $this->{$rule}($key);
                 }
             }
+            $this->sometimes = false;
         }
 
         return $this->errors;
@@ -53,19 +58,25 @@ class Validator implements ValidatorInterface
 
     private function string(string $value): void
     {
-        if (isset($this->data[$value]) && is_string($this->data[$value])) {
+        if (isset($this->data[$value]) && is_string($this->data[$value]) || $this->sometimes) {
+
             return;
-            }
+        }
 
         $this->errors[] = "{$value} must be a string";
     }
 
     private function notBlank(string $value): void
     {
-        if (isset($this->data[$value]) && !empty($this->data[$value])) {
+        if (isset($this->data[$value]) && !empty($this->data[$value]) || $this->sometimes) {
             return;
         }
 
         $this->errors[] = "{$value} must be a non-blank";
+    }
+
+    public function sometimes(): void
+    {
+        $this->sometimes = true;
     }
 }

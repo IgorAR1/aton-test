@@ -89,7 +89,7 @@ final class CityController extends AbstractController
 //            return $this->redirect('cities_edit', ['errors' => $errors]);
         }
 
-        $data = new UpdateCityDTO($id, $request['city'],$request['country_id']);//Дто здесь не нужен
+        $data = new UpdateCityDTO($id, $request['city'], $request['country_id']);//Дто здесь не нужен
 
         $this->cityRepository->update($data);
 

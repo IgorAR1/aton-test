@@ -19,7 +19,7 @@ class QueryBuilder
 
     private static string $type = '';
 
-    public function select(string $select): self
+    public function select(string $select): static//self?
     {
         self::$type = 'SELECT';
 
@@ -28,21 +28,21 @@ class QueryBuilder
         return $this;
     }
 
-    public function from(string $table, string $alias): self
+    public function from(string $table, string $alias): static
     {
         $this->queryParts['from'][] = $table . ' AS ' . $alias;
 
         return $this;
     }
 
-    public function where(string $predicate): self
+    public function where(string $predicate): static
     {
         $this->andWhere($predicate);
 
         return $this;
     }
 
-    public function andWhere(string $predicate): self
+    public function andWhere(string $predicate): static
     {
         $where = &$this->queryParts['where'];
 
@@ -51,7 +51,7 @@ class QueryBuilder
         return $this;
     }
 
-    public function orWhere(string $predicate): self
+    public function orWhere(string $predicate): static
     {
         $where = &$this->queryParts['where'];
 
@@ -60,35 +60,35 @@ class QueryBuilder
         return $this;
     }
 
-    public function join(string $condition): self
+    public function join(string $condition): static
     {
         $this->innerJoin($condition);
 
         return $this;
     }
 
-    public function innerJoin(string $condition): self
+    public function innerJoin(string $condition): static
     {
         $this->queryParts['join'][] = ' INNER JOIN ' . $condition;
 
         return $this;
     }
 
-    public function leftJoin(string $condition): self
+    public function leftJoin(string $condition): static
     {
         $this->queryParts['join'][] = ' LEFT JOIN ' . $condition;
 
         return $this;
     }
 
-    public function rightJoin(string $condition)
+    public function rightJoin(string $condition): static
     {
         $this->queryParts['join'][] = ' RIGHT JOIN ' . $condition;
 
         return $this;
     }
 
-    public function orderBy(string $column, string $order = 'asc'): self
+    public function orderBy(string $column, string $order = 'asc'): static
     {
         $this->queryParts['order'][] = $column . ' ' . $order;
 
@@ -107,7 +107,7 @@ class QueryBuilder
 //
 //        return $this;
 //    }
-    public function update(string $table, array $params): self
+    public function update(string $table, array $params): static
     {
         self::$type = 'UPDATE';
 
@@ -123,7 +123,7 @@ class QueryBuilder
     }
 
 
-    public function insert(string $table, array $params): self
+    public function insert(string $table, array $params): static
     {
         self::$type = 'INSERT';
 
@@ -139,7 +139,7 @@ class QueryBuilder
         return $this;
     }
 
-    public function delete($table, string $predicate = ''): self
+    public function delete($table, string $predicate = ''): static
     {
         $this->queryParts['delete'][] = $table;
 
@@ -164,14 +164,14 @@ class QueryBuilder
         return $this->queryParams;
     }
 
-    public function setParameter(string $key, string $value): self
+    public function setParameter(string $key, string $value): static
     {
         $this->queryParams[$key] = $value;
 
         return $this;
     }
 
-    public function setParameters(array $params): self
+    public function setParameters(array $params): static
     {
         $this->queryParams = array_merge($this->queryParams, $params);
 
@@ -198,7 +198,7 @@ class QueryBuilder
         }
 
         if (!empty($this->queryParts['where'])) {
-            $sql .= ' WHERE ' . implode(' ', $this->queryParts['where']);
+            $sql .= ' WHERE ' . implode('', $this->queryParts['where']);
         }
         if (!empty($this->queryParts['order'])) {
             $sql .= ' ORDER BY ' . implode(', ', $this->queryParts['order']);
@@ -218,7 +218,7 @@ class QueryBuilder
         $sql = 'UPDATE ' . $this->queryParts['update'];
 
         if (!empty($this->queryParts['where'])) {
-            $sql .= ' WHERE ' . implode(' ', $this->queryParts['where']);
+            $sql .= ' WHERE ' . implode('', $this->queryParts['where']);
         }
 
         return $sql;

@@ -1,19 +1,20 @@
 <h1>Список пользователей</h1>
+Фильтры:
 
 <form id="userFilterForm" method="get">
     <label>
-        <input type="checkbox" data-filter="first_name">
-        Имя:
-        <input type="text" name="filter[first_name]" value="{$filter['first_name'] ?? ''}">
+        <input type="checkbox" data-filter="full_name">
+        Имя или фамилия:
+        <input type="text" name="filter[full_name]" value="{$filter['full_name'] ?? ''}">
     </label>
     <br>
 
-    <label>
-        <input type="checkbox" data-filter="last_name">
-        Фамилия:
-        <input type="text" name="filter[last_name]" value="{$filter['last_name'] ?? ''}">
-    </label>
-    <br>
+{*    <label>*}
+{*        <input type="checkbox" data-filter="last_name">*}
+{*        Фамилия:*}
+{*        <input type="text" name="filter[last_name]" value="{$filter['last_name'] ?? ''}">*}
+{*    </label>*}
+{*    <br>*}
 
     <label>
         <input type="checkbox" data-filter="country">

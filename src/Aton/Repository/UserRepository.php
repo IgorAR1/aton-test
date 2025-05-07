@@ -52,6 +52,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         $this->connection->beginTransaction();
 
         $user = $this->findOne($data->getId());
+
         $user['first_name'] = $data->getFirstName() ?? $user['first_name'];
         $user['last_name'] = $data->getLastName() ?? $user['last_name'];
         $user['city_id'] = $data->getCityId() ?? $user['city_id'];
@@ -68,6 +69,8 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         return true;
     }
 
+
+
     public function getAllForView(): array
     {
         $qb = $this->queryBuilder();
@@ -81,8 +84,8 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         $this->sorter->apply($qb, ['id', 'first_name', 'last_name', 'ct.city', 'c.country']);
 
         $q = $qb->getQuery();
-
 //        dd($q);
+
         $stmt = $this->connection->prepare($q);
         $stmt->execute($qb->getQueryParams());
 

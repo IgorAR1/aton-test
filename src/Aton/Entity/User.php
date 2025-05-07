@@ -1,13 +1,15 @@
 <?php
 
-namespace App\Blog\Entity;
+namespace App\Aton\Entity;
+
+use App\Aton\VOs\UserCity;
 
 class User
 {
     private int $id;
     private string $firstName;
     private string $lastName;
-    private City $city;
+    private UserCity $city;
 
     public function __construct(int $id)
     {
@@ -28,7 +30,7 @@ class User
         return $this->lastName;
     }
 
-    public function getCity(City $city): City
+    public function getCity(): UserCity
     {
         return $this->city;
     }
@@ -38,7 +40,7 @@ class User
         $this->lastName = $lastName;
     }
 
-    public function setCity(City $city): void
+    public function setCity(UserCity $city): void
     {
         $this->city = $city;
     }

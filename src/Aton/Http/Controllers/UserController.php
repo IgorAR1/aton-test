@@ -2,12 +2,9 @@
 
 namespace App\Aton\Http\Controllers;
 
-use App\Aton\DTOs\CreateCountryDTO;
 use App\Aton\DTOs\CreateUserDTO;
-use App\Aton\DTOs\UpdateCountryDTO;
 use App\Aton\DTOs\UpdateUserDTO;
 use App\Aton\Repository\CityRepositoryInterface;
-use App\Aton\Repository\CountryRepositoryInterface;
 use App\Aton\Repository\UserRepositoryInterface;
 use App\Core\Http\Controllers\AbstractController;
 use App\Core\Validator\ValidatorInterface;
@@ -62,7 +59,7 @@ final class UserController extends AbstractController
         $errors = $this->validator
             ->setRules([
                 'first_name' => ['notBlank', 'string'],
-                'last_name' => ['string'],//sometimes нужен
+                'last_name' => ['sometimes', 'string'],
                 'city_id' => ['notBlank', 'int'],
             ])
             ->validate($request);
@@ -71,7 +68,7 @@ final class UserController extends AbstractController
             return $this->redirect('/aton/users/create', $errors);
         }
 
-        $data = new CreateUserDTO(...$request);//Дто здесь не нужен
+        $data = new CreateUserDTO(...$request);
 
         $this->userRepository->create($data);
 
@@ -84,9 +81,9 @@ final class UserController extends AbstractController
 
         $errors = $this->validator
             ->setRules([
-                'first_name' => ['notBlank', 'string'],
-                'last_name' => ['string'],//sometimes нужен
-                'city_id' => ['notBlank', 'int'],
+                'first_name' => ['sometimes', 'notBlank', 'string'],
+                'last_name' => ['sometimes', 'string'],
+                'city_id' => ['sometimes', 'notBlank', 'int'],
             ])
             ->validate($request);
 
@@ -96,14 +93,14 @@ final class UserController extends AbstractController
 
         $data = new UpdateUserDTO($id, ...$request);
 
-        $this->countryRepository->update($data);
+        $this->userRepository->update($data);
 
         return $this->redirect('/aton/users');
     }
 
     public function delete(int $id): ResponseInterface
     {
-        $this->cityRepository->delete($id);
+        $this->userRepository->delete($id);
 
         return $this->redirect('/aton/users');
     }
