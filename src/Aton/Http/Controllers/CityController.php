@@ -53,20 +53,18 @@ final class CityController extends AbstractController
 
     public function store(ServerRequestInterface $request): ResponseInterface
     {
-        $request = $request->getParsedBody();
+        $data = $request->getParsedBody();
 
         $errors = $this->validator
             ->setRules([
                 'city' => ['required', 'notBlank', 'string'],
                 'country_id' => ['required', 'int']
             ])
-            ->validate($request);
+            ->validate($data);
 
         if (count($errors) > 0) {
             return $this->redirect('/aton/cities/create', $errors);
         }
-
-        $data = new CreateCityDTO(...$request);
 
         $this->cityRepository->create($data);
 
@@ -75,23 +73,20 @@ final class CityController extends AbstractController
 
     public function update(int $id, ServerRequestInterface $request): ResponseInterface
     {
-        $request = $request->getParsedBody();
+        $data = $request->getParsedBody();
 
         $errors = $this->validator
             ->setRules([
                 'city' => ['required', 'notBlank', 'string'],
                 'country_id' => ['required', 'int']
             ])
-            ->validate($request);
+            ->validate($data);
 
         if (count($errors) > 0) {
-            return $this->render('cities_edit', ['errors' => $errors]);
-//            return $this->redirect('cities_edit', ['errors' => $errors]);
+            return $this->redirect("/aton/cities/edit/{$id}", $errors);
         }
 
-        $data = new UpdateCityDTO($id, $request['city'], $request['country_id']);//Дто здесь не нужен
-
-        $this->cityRepository->update($data);
+        $this->cityRepository->update($id,$data);
 
         return $this->redirect('/aton/cities');
     }

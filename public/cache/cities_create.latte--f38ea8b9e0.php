@@ -41,9 +41,9 @@ final class Template_f38ea8b9e0 extends Latte\Runtime\Template
 ';
 		foreach ($countries as $country) /* line 18 */ {
 			echo '                <option value="';
-			echo LR\Filters::escapeHtmlAttr($country['id']) /* line 19 */;
+			echo LR\Filters::escapeHtmlAttr($country->getId()) /* line 19 */;
 			echo '">';
-			echo LR\Filters::escapeHtmlText($country['country']) /* line 19 */;
+			echo LR\Filters::escapeHtmlText($country->getName()) /* line 19 */;
 			echo '</option>
 ';
 

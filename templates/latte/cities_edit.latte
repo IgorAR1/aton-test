@@ -1,4 +1,4 @@
-<h1>Edit {$city['city']}</h1>
+<h1>Edit {$city->getName()}</h1>
 
 <form method="post" action="">
     <label>
@@ -11,7 +11,19 @@
             </ul>
         {/if}
 
-        <input type="text" name="city" value="{$city['city']}">
+        <input type="text" name="city" value="{$city->getName()}">
+    </label>
+    <br>
+    <label>
+        Country:
+        <select name="country_id" required>
+            <option value="">-- выберите страну--</option>
+            {foreach $countries as $country}
+                <option value="{$country->getId()}" {if $city->getId() == $country->getId()}selected{/if}>
+                    {$country->getName()}
+                </option>
+            {/foreach}
+        </select>
     </label>
     <br>
 

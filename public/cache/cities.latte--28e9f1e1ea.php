@@ -88,13 +88,13 @@ final class Template_28e9f1e1ea extends Latte\Runtime\Template
 		foreach ($cities as $city) /* line 46 */ {
 			echo '        <tr>
             <td>';
-			echo LR\Filters::escapeHtmlText($city['id']) /* line 48 */;
+			echo LR\Filters::escapeHtmlText($city->getId()) /* line 48 */;
 			echo '</td>
             <td>';
-			echo LR\Filters::escapeHtmlText($city['country']) /* line 49 */;
+			echo LR\Filters::escapeHtmlText($city->getCountry()->getName()) /* line 49 */;
 			echo '</td>
             <td>';
-			echo LR\Filters::escapeHtmlText($city['city']) /* line 50 */;
+			echo LR\Filters::escapeHtmlText($city->getName()) /* line 50 */;
 			echo '</td>
         </tr>
 ';

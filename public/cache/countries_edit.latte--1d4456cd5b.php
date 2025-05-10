@@ -14,7 +14,7 @@ final class Template_1d4456cd5b extends Latte\Runtime\Template
 		unset($ʟ_args);
 
 		echo '<h1>Edit ';
-		echo LR\Filters::escapeHtmlText($country['country']) /* line 1 */;
+		echo LR\Filters::escapeHtmlText($country->getName()) /* line 1 */;
 		echo '</h1>
 
 <form method="post" action="">
@@ -37,7 +37,7 @@ final class Template_1d4456cd5b extends Latte\Runtime\Template
 		}
 		echo '
         <input type="text" name="country" value="';
-		echo LR\Filters::escapeHtmlAttr($country['country']) /* line 14 */;
+		echo LR\Filters::escapeHtmlAttr($country->getName()) /* line 14 */;
 		echo '">
     </label>
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Blog\Entity;
+namespace App\Aton\Entity;
 
 class City
 {
@@ -28,12 +28,12 @@ class City
         return $this->country;
     }
 
-    public function setName(string $name)
+    public function setName(string $name): void
     {
         $this->name = $name;
     }
 
-    public function setCountry(Country $country)
+    public function setCountry(Country $country): void
     {
         $this->country = $country;
     }

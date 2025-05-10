@@ -24,7 +24,7 @@
         City:
         <select name="city_id">
             {foreach $cities as $city}
-                <option value="{$city['id']}">{$city['city']}</option>
+                <option value="{$city->getId()}">{$city->getName()}</option>
             {/foreach}
         </select>
     </label>

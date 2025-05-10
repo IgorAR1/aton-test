@@ -10,10 +10,12 @@ use App\Aton\Repository\UserRepository;
 use App\Aton\Repository\UserRepositoryInterface;
 use App\Aton\Sorters\AbstractSorter;
 use App\Aton\Sorters\Sorter;
+use App\Core\Cache\FileSystem\FileCache;
+use App\Core\Cache\FileSystem\SingleFileCache;
 use App\Core\Support\ServiceProvider\ServiceProvider;
 use App\Core\Validator\Validator;
 use App\Core\Validator\ValidatorInterface;
-use Latte\Engine;
+use Psr\Cache\CacheItemPoolInterface;
 
 class AppServiceProviders extends ServiceProvider
 {
@@ -28,5 +30,8 @@ class AppServiceProviders extends ServiceProvider
         $this->application->bind(CityRepositoryInterface::class,CityRepository::class);
         $this->application->bind(AbstractSorter::class,Sorter::class);
         $this->application->bind(ValidatorInterface::class,Validator::class);
+        $this->application->bind(CacheItemPoolInterface::class,function (){
+            return new SingleFileCache('cache','/var/www/aton/cache2');
+        });
     }
 }

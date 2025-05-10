@@ -1,4 +1,4 @@
-<h1>Edit {$country['country']}</h1>
+<h1>Edit {$country->getName()}</h1>
 
 <form method="post" action="">
     <label>
@@ -11,7 +11,7 @@
             </ul>
         {/if}
 
-        <input type="text" name="country" value="{$country['country']}">
+        <input type="text" name="country" value="{$country->getName()}">
     </label>
 
     <input type="submit" value="Edit">

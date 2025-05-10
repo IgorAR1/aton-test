@@ -3,7 +3,6 @@
 namespace App\Core\Cache;
 
 use Psr\Cache\CacheItemInterface;
-use Psr\Cache\CacheItemPoolInterface;
 
 final class ArrayCache extends AbstractCache
 {

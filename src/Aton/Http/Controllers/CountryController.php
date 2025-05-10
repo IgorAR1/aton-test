@@ -2,21 +2,25 @@
 
 namespace App\Aton\Http\Controllers;
 
-use App\Aton\DTOs\CreateCountryDTO;
-use App\Aton\DTOs\UpdateCountryDTO;
 use App\Aton\Repository\CountryRepositoryInterface;
+use App\Core\Cache\CacheItem;
+use App\Core\Cache\FileSystem\FileCache;
+use App\Core\Cache\FileSystem\SingleFileCache;
 use App\Core\Http\Controllers\AbstractController;
 use App\Core\Validator\ValidatorInterface;
-//use App\Core\View\Engine;
 use GuzzleHttp\Psr7\Response;
 use Latte\Engine;
+use Psr\Cache\CacheItemPoolInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+
+//use App\Core\View\Engine;
 
 final class CountryController extends AbstractController
 {
     public function __construct(Engine $renderEngine,
-                                protected CountryRepositoryInterface $countryRepository,
+                                private CacheItemPoolInterface $cache,
+                                private CountryRepositoryInterface $countryRepository,
                                 private ValidatorInterface $validator)
     {
         parent::__construct($renderEngine);
@@ -24,7 +28,16 @@ final class CountryController extends AbstractController
 
     public function index(): Response
     {
+        $country = $this->countryRepository->findOne(1);
+
+        $cache = new CacheItem('countries', $country);
+        $cache = $cache->expiresAfter(333333343);
+
+        $this->cache->save($cache);
+
         $countries = $this->countryRepository->getAllForView();
+
+        $this->cache->hasItem('key');
 
         return $this->render("countries.latte", ['countries' => $countries]);
     }
@@ -47,15 +60,14 @@ final class CountryController extends AbstractController
 
     public function store(ServerRequestInterface $request): ResponseInterface
     {
+        $data = $request->getParsedBody();
         $errors = $this->validator
             ->setRules(['country' => ['required', 'notBlank', 'string']])
-            ->validate($request->getParsedBody());
+            ->validate($data);
 
         if (count($errors) > 0) {
-            return $this->redirect('countries_create', ['errors' => $errors]);
+            return $this->redirect('/aton/countries/create', $errors);
         }
-
-        $data = new CreateCountryDTO(...$request->getParsedBody());//Дто здесь не нужен
 
         $this->countryRepository->create($data);
 
@@ -64,17 +76,17 @@ final class CountryController extends AbstractController
 
     public function update(int $id, ServerRequestInterface $request): ResponseInterface
     {
+        $data = $request->getParsedBody();
+
         $errors = $this->validator
             ->setRules(['country' => ['string']])
-            ->validate($request->getParsedBody());
+            ->validate($data);
 
         if (count($errors) > 0) {
-            return $this->redirect('countries_create', $errors);
+            return $this->redirect("/aton/countries/edit/{$id}", $errors);
         }
 
-        $data = new UpdateCountryDTO($id, $request->getParsedBody()['country']);//Дто здесь не нужен
-
-        $this->countryRepository->update($data);
+        $this->countryRepository->update($id,$data);
 
         return $this->redirect('/aton/countries');
     }

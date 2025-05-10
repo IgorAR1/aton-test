@@ -73,10 +73,10 @@ final class Template_ea19e92d56 extends Latte\Runtime\Template
 		foreach ($countries as $country) /* line 37 */ {
 			echo '        <tr>
             <td>';
-			echo LR\Filters::escapeHtmlText($country['id']) /* line 39 */;
+			echo LR\Filters::escapeHtmlText($country->getId()) /* line 39 */;
 			echo '</td>
             <td>';
-			echo LR\Filters::escapeHtmlText($country['country']) /* line 40 */;
+			echo LR\Filters::escapeHtmlText($country->getName()) /* line 40 */;
 			echo '</td>
         </tr>
 ';

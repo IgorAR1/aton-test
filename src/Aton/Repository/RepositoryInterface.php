@@ -5,6 +5,7 @@ namespace App\Aton\Repository;
 interface RepositoryInterface
 {
     public function findAll(): array;
-
-    public function findOne(int $id): array;
+    public function create(array $data): string;
+    public function update(int $id, array $data): bool;
+    public function delete(int $id): bool;
 }

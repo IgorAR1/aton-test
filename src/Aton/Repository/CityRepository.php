@@ -2,8 +2,8 @@
 
 namespace App\Aton\Repository;
 
-use App\Aton\DTOs\CreateCityDTO;
-use App\Aton\DTOs\UpdateCityDTO;
+use App\Aton\Entity\City;
+use App\Aton\Entity\Country;
 use App\Aton\Filters\CitiesFilter;
 use App\Aton\Sorters\AbstractSorter;
 use App\Core\Database\Connection;
@@ -21,13 +21,16 @@ class CityRepository extends BaseRepository implements CityRepositoryInterface
         parent::__construct($connection, $queryBuilder);
     }
 
-    public function create(CreateCityDTO $data): string
+    public function create(array $data): string
     {
         $qb = $this->queryBuilder();
 
         $this->connection->beginTransaction();
 
-        $sql = $qb->insert(self::$table, ['city' => $data->getCity(), 'country_id' => $data->getCountryId()])
+        $sql = $qb->insert(self::$table, [
+            'city' => $data['city'],
+            'country_id' => $data['country_id'],
+        ])
             ->getQuery();
 
         $stmt = $this->connection->prepare($sql);
@@ -38,16 +41,17 @@ class CityRepository extends BaseRepository implements CityRepositoryInterface
         return $this->connection->lastInsertId();
     }
 
-    public function update(UpdateCityDTO $data): bool
+    public function update(int $id, array $data): bool
     {
         $qb = $this->queryBuilder();
 
         $this->connection->beginTransaction();
 
-        $city = $this->findOne($data->getId());
+        $city['id'] = $id;
+        $city['city'] = $data['city'];
+        $city['country_id'] = $data['country_id'];
 
-        $city['city'] = $data->getCity() ?? $city['city'];
-        $city['country_id'] = $data->getCountryId() ?? $city['city'];
+        $city = array_filter($city, fn($value) => $value !== null);
 
         $sql = $qb->update(self::$table, $city)
             ->where('id = :id')
@@ -56,16 +60,49 @@ class CityRepository extends BaseRepository implements CityRepositoryInterface
         $stmt = $this->connection->prepare($sql);
         $stmt->execute($qb->getQueryParams());
 
-        $this->connection->commit();
+        return $this->connection->commit();
+    }
 
-        return true;
+    public function findOne(int $id): ?City
+    {
+        $qb = $this->queryBuilder();
+
+        $q = $qb->select('ct.*, c.country')
+            ->from(static::$table, 'ct')
+            ->join('countries AS c ON ct.country_id = c.id')
+            ->where('ct.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery();
+
+        $stmt = $this->connection->prepare($q);
+        $stmt->execute($qb->getQueryParams());
+        $fetched = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        return $this->mapEntity($fetched);
+    }
+
+    public function findAll(): array
+    {
+        $qb = $this->queryBuilder();
+
+        $q = $qb->select('ct.*, c.country')
+            ->from(static::$table, 'ct')
+            ->join('countries AS c ON ct.country_id = c.id')
+            ->getQuery();
+
+        $stmt = $this->connection->prepare($q);
+        $stmt->execute($qb->getQueryParams());
+
+        $fetched = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return $this->mapEntities($fetched);
     }
 
     public function getAllForView(): array
     {
         $qb = $this->queryBuilder();
 
-        $qb->select("ct.id, ct.city, c.country")
+        $qb->select("ct.*, c.country")
             ->from(self::$table, 'ct')
             ->join("countries AS c ON c.id = ct.country_id");
 
@@ -77,10 +114,13 @@ class CityRepository extends BaseRepository implements CityRepositoryInterface
         $stmt = $this->connection->prepare($q);
         $stmt->execute($qb->getQueryParams());
 
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $fetched = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+
+        return $this->mapEntities($fetched);
     }
 
-    public function getCountryForCity(int $id): array
+    public function getCountryForCity(int $id): Country
     {
         $qb = $this->queryBuilder();
 
@@ -92,9 +132,20 @@ class CityRepository extends BaseRepository implements CityRepositoryInterface
             ->getQuery();
 
         $stmt = $this->connection->prepare($q);
-
         $stmt->execute($qb->getQueryParams());
+        $fetched = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-        return $stmt->fetch(\PDO::FETCH_ASSOC);
+        return new Country($fetched['country']);
     }
+
+    protected function mapEntity(array $data): City
+    {
+        $city = new City($data['id']);
+        $country = new Country($data['country_id'], $data['country']);
+        $city->setName($data['city']);
+        $city->setCountry($country);
+
+        return $city;
+    }
+
 }

@@ -49,9 +49,9 @@ final class Template_4dcf8794df extends Latte\Runtime\Template
 ';
 		foreach ($cities as $city) /* line 26 */ {
 			echo '                <option value="';
-			echo LR\Filters::escapeHtmlAttr($city['id']) /* line 27 */;
+			echo LR\Filters::escapeHtmlAttr($city->getId()) /* line 27 */;
 			echo '">';
-			echo LR\Filters::escapeHtmlText($city['city']) /* line 27 */;
+			echo LR\Filters::escapeHtmlText($city->getName()) /* line 27 */;
 			echo '</option>
 ';
 

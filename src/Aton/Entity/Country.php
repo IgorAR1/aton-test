@@ -5,11 +5,11 @@ namespace App\Aton\Entity;
 class Country
 {
     private int $id;
-    private ?string $country;
+    private ?string $name;
 
     public function __construct(int $id, string $country = null)
     {
-        $this->country = $country;
+        $this->name = $country;
         $this->id = $id;
     }
 
@@ -18,13 +18,13 @@ class Country
         return $this->id;
     }
 
-    public function getCountry(): string
+    public function getName(): string
     {
-        return $this->country;
+        return $this->name;
     }
 
-    public function setCountry(string $country): void
+    public function setName(string $country): void
     {
-        $this->country = $country;
+        $this->name = $country;
     }
 }

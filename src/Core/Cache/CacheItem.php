@@ -18,7 +18,7 @@ final class CacheItem implements CacheItemInterface
     private int|float|null $expiration = null;
 
     public function __construct(readonly string $key,
-                                private ?string $value = null,
+                                private mixed $value = null,
                                 private bool    $isHit = false)
     {}
 

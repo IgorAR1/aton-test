@@ -16,7 +16,7 @@
 
         <select name="country_id">
             {foreach $countries as $country}
-                <option value="{$country['id']}">{$country['country']}</option>
+                <option value="{$country->getId()}">{$country->getName()}</option>
             {/foreach}
         </select>
     </label>

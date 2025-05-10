@@ -2,8 +2,6 @@
 
 namespace App\Aton\Http\Controllers;
 
-use App\Aton\DTOs\CreateUserDTO;
-use App\Aton\DTOs\UpdateUserDTO;
 use App\Aton\Repository\CityRepositoryInterface;
 use App\Aton\Repository\UserRepositoryInterface;
 use App\Core\Http\Controllers\AbstractController;
@@ -54,7 +52,7 @@ final class UserController extends AbstractController
 
     public function store(ServerRequestInterface $request): ResponseInterface
     {
-        $request = $request->getParsedBody();
+        $data = $request->getParsedBody();
 
         $errors = $this->validator
             ->setRules([
@@ -62,13 +60,11 @@ final class UserController extends AbstractController
                 'last_name' => ['sometimes', 'string'],
                 'city_id' => ['notBlank', 'int'],
             ])
-            ->validate($request);
+            ->validate($data);
 
         if (count($errors) > 0) {
             return $this->redirect('/aton/users/create', $errors);
         }
-
-        $data = new CreateUserDTO(...$request);
 
         $this->userRepository->create($data);
 
@@ -77,7 +73,7 @@ final class UserController extends AbstractController
 
     public function update(int $id, ServerRequestInterface $request): ResponseInterface
     {
-        $request = $request->getParsedBody();
+        $data = $request->getParsedBody();
 
         $errors = $this->validator
             ->setRules([
@@ -85,15 +81,13 @@ final class UserController extends AbstractController
                 'last_name' => ['sometimes', 'string'],
                 'city_id' => ['sometimes', 'notBlank', 'int'],
             ])
-            ->validate($request);
+            ->validate($data);
 
         if (count($errors) > 0) {
             return $this->render('users_create', $errors);
         }
 
-        $data = new UpdateUserDTO($id, ...$request);
-
-        $this->userRepository->update($data);
+        $this->userRepository->update($id ,$data);
 
         return $this->redirect('/aton/users');
     }

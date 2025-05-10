@@ -45,9 +45,9 @@
     </tr>
     {foreach $cities as $city}
         <tr>
-            <td>{$city['id']}</td>
-            <td>{$city['country']}</td>
-            <td>{$city['city']}</td>
+            <td>{$city->getId()}</td>
+            <td>{$city->getCountry()->getName()}</td>
+            <td>{$city->getName()}</td>
         </tr>
     {/foreach}
 </table>

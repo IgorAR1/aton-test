@@ -9,13 +9,6 @@
     </label>
     <br>
 
-{*    <label>*}
-{*        <input type="checkbox" data-filter="last_name">*}
-{*        Фамилия:*}
-{*        <input type="text" name="filter[last_name]" value="{$filter['last_name'] ?? ''}">*}
-{*    </label>*}
-{*    <br>*}
-
     <label>
         <input type="checkbox" data-filter="country">
         Название страны:
@@ -35,7 +28,7 @@
         <option value="id" {if ($sort ?? '') === 'id'}selected{/if}>По ID</option>
         <option value="country" {if ($sort ?? '') === 'country'}selected{/if}>По названию страны</option>
         <option value="city" {if ($sort ?? '') === 'city'}selected{/if}>По названию города</option>
-        <option value="name" {if ($sort ?? '') === 'name'}selected{/if}>По фамилии + имени</option>
+        <option value="first_name" {if ($sort ?? '') === 'name'}selected{/if}>По фамилии + имени</option>
     </select>
 
     <select name="order">
@@ -43,24 +36,24 @@
         <option value="desc" {if ($order ?? '') === 'desc'}selected{/if}>По убыванию</option>
     </select>
 
-    <button type="submit">Фильтровать</button>
+    <button type="submit">Filter</button>
 </form>
 
 <table border="1">
     <tr>
         <th>ID</th>
-        <th>Фамилия</th>
-        <th>Имя</th>
-        <th>Название страны</th>
-        <th>Название города</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>City</th>
+        <th>Country</th>
     </tr>
     {foreach $users as $user}
         <tr>
-            <td>{$user['id']}</td>
-            <td>{$user['last_name']}</td>
-            <td>{$user['first_name']}</td>
-            <td>{$user['country']}</td>
-            <td>{$user['city']}</td>
+            <td>{$user->getId()}</td>
+            <td>{$user->getFirstName()}</td>
+            <td>{$user->getLastName()}</td>
+            <td>{$user->getLocation()->city}</td>
+            <td>{$user->getLocation()->country}</td>
         </tr>
     {/foreach}
 </table>

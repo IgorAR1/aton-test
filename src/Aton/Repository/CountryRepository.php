@@ -2,8 +2,7 @@
 
 namespace App\Aton\Repository;
 
-use App\Aton\DTOs\CreateCountryDTO;
-use App\Aton\DTOs\UpdateCountryDTO;
+use App\Aton\Entity\Country;
 use App\Aton\Filters\CountriesFilter;
 use App\Aton\Sorters\AbstractSorter;
 use App\Core\Database\Connection;
@@ -21,13 +20,13 @@ class CountryRepository extends BaseRepository implements CountryRepositoryInter
         parent::__construct($connection, $queryBuilder);
     }
 
-    public function create(CreateCountryDTO $data): string
+    public function create(array $data): string
     {
         $qb = $this->queryBuilder();
 
         $this->connection->beginTransaction();
 
-        $sql = $qb->insert(self::$table, ['country' => $data->getCountry()])
+        $sql = $qb->insert(self::$table, ['country' => $data['country']])
             ->getQuery();
 
         $stmt = $this->connection->prepare($sql);
@@ -38,14 +37,16 @@ class CountryRepository extends BaseRepository implements CountryRepositoryInter
         return $this->connection->lastInsertId();
     }
 
-    public function update(UpdateCountryDTO $data): string
+    public function update(int $id, array $data): bool
     {
         $qb = $this->queryBuilder();
 
         $this->connection->beginTransaction();
 
-        $country = $this->findOne($data->getId());
-        $country['country'] = $data->getCountry() ?? $country['country'];
+        $country['id'] = $id;
+        $country['country'] = $data['country'];
+
+        $country = array_filter($country, fn($value) => $value !== null);
 
         $sql = $qb->update(self::$table, $country)
             ->where('id = :id')
@@ -54,9 +55,41 @@ class CountryRepository extends BaseRepository implements CountryRepositoryInter
         $stmt = $this->connection->prepare($sql);
         $stmt->execute($qb->getQueryParams());
 
-        $this->connection->commit();
+        return $this->connection->commit();
+    }
 
-        return true;
+    public function findOne(int $id): ?Country
+    {
+        $qb = $this->queryBuilder();
+
+        $q = $qb->select('*')
+            ->from(static::$table, 'c')
+            ->where('c.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery();
+
+        $stmt = $this->connection->prepare($q);
+        $stmt->execute($qb->getQueryParams());
+
+        $fetched = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        return $this->mapEntity($fetched);
+    }
+
+    public function findAll(): array
+    {
+        $qb = $this->queryBuilder();
+
+        $q = $qb->select('*')
+            ->from(static::$table, 'c')
+            ->getQuery();
+
+        $stmt = $this->connection->prepare($q);
+        $stmt->execute($qb->getQueryParams());
+
+        $fetched = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return $this->mapEntities($fetched);
     }
 
     public function getAllForView(): array
@@ -73,6 +106,14 @@ class CountryRepository extends BaseRepository implements CountryRepositoryInter
         $stmt = $this->connection->prepare($q);
         $stmt->execute($qb->getQueryParams());
 
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $fetched = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return $this->mapEntities($fetched);
     }
+
+    protected function mapEntity(array $data): Country
+    {
+       return new Country($data['id'], $data['country']);
+    }
+
 }

@@ -36,8 +36,8 @@
     </tr>
     {foreach $countries as $country}
         <tr>
-            <td>{$country['id']}</td>
-            <td>{$country['country']}</td>
+            <td>{$country->getId()}</td>
+            <td>{$country->getName()}</td>
         </tr>
     {/foreach}
 </table>

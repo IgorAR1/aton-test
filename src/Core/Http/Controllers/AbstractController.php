@@ -6,6 +6,7 @@ use App\Core\Http\HtmlResponse;
 //use App\Core\View\Engine;
 use GuzzleHttp\Psr7\Response;
 use Latte\Engine;
+use Psr\Cache\CacheItemPoolInterface;
 use Psr\Http\Message\ResponseInterface;
 
 abstract class AbstractController

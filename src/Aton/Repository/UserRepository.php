@@ -6,9 +6,11 @@ use App\Aton\DTOs\CreateCountryDTO;
 use App\Aton\DTOs\CreateUserDTO;
 use App\Aton\DTOs\UpdateCountryDTO;
 use App\Aton\DTOs\UpdateUserDTO;
+use App\Aton\Entity\User;
 use App\Aton\Filters\CountriesFilter;
 use App\Aton\Filters\UsersFilter;
 use App\Aton\Sorters\AbstractSorter;
+use App\Aton\VOs\UserLocation;
 use App\Core\Database\Connection;
 use App\Core\Database\QueryBuilder;
 
@@ -24,17 +26,17 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         parent::__construct($connection, $queryBuilder);
     }
 
-    public function create(CreateUserDTO $data): string
+    public function create(array $data): string
     {
         $qb = $this->queryBuilder();
 
         $this->connection->beginTransaction();
 
         $sql = $qb->insert(self::$table, [
-            'first_name' => $data->getFirstName(),
-            'last_name' => $data->getLastName(),
-            'city_id' => $data->getCityId(),
-        ])
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
+                'city_id' => $data['city_id'],
+            ])
             ->getQuery();
 
         $stmt = $this->connection->prepare($sql);
@@ -45,17 +47,18 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         return $this->connection->lastInsertId();
     }
 
-    public function update(UpdateUserDTO $data): string
+    public function update(int $id, array $data): bool
     {
         $qb = $this->queryBuilder();
 
         $this->connection->beginTransaction();
 
-        $user = $this->findOne($data->getId());
+        $user['id'] = $id;
+        $user['first_name'] = $data['first_name'];
+        $user['last_name'] = $data['last_name'];
+        $user['city_id'] = $data['city_id'];
 
-        $user['first_name'] = $data->getFirstName() ?? $user['first_name'];
-        $user['last_name'] = $data->getLastName() ?? $user['last_name'];
-        $user['city_id'] = $data->getCityId() ?? $user['city_id'];
+        $user = array_filter($user, fn($value) => $value !== null);
 
         $sql = $qb->update(self::$table, $user)
             ->where('id = :id')
@@ -64,12 +67,45 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         $stmt = $this->connection->prepare($sql);
         $stmt->execute($qb->getQueryParams());
 
-        $this->connection->commit();
-
-        return true;
+        return $this->connection->commit();
     }
 
+    public function findOne(int $id): ?User
+    {
+        $qb = $this->queryBuilder();
 
+        $q = $qb->select('u.*, ct.city, c.country')
+            ->from(static::$table, 'u')
+            ->join('cities AS ct ON u.city_id = ct.id')
+            ->join('countries AS c ON ct.country_id = c.id')
+            ->where('u.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery();
+
+        $stmt = $this->connection->prepare($q);
+        $stmt->execute($qb->getQueryParams());
+        $fetched = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        return $this->mapEntity($fetched);
+    }
+
+    public function findAll(): array
+    {
+        $qb = $this->queryBuilder();
+
+        $q = $qb->select('u.*, ct.city, c.country')
+            ->from(static::$table, 'u')
+            ->join('cities AS ct ON u.city_id = ct.id')
+            ->join('countries AS c ON ct.country_id = c.id')
+            ->getQuery();
+
+        $stmt = $this->connection->prepare($q);
+        $stmt->execute($qb->getQueryParams());
+
+        $fetched = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return $this->mapEntities($fetched);
+    }
 
     public function getAllForView(): array
     {
@@ -84,11 +120,25 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         $this->sorter->apply($qb, ['id', 'first_name', 'last_name', 'ct.city', 'c.country']);
 
         $q = $qb->getQuery();
-//        dd($q);
 
         $stmt = $this->connection->prepare($q);
         $stmt->execute($qb->getQueryParams());
 
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $fetched = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return $this->mapEntities($fetched);
+    }
+
+    protected function mapEntity(array $data): User
+    {
+        $user = new User($data['id']);
+
+        $location = new UserLocation($data['city'], $data['country']);
+        $user->setFirstName($data['first_name']);
+        $user->setLastName($data['last_name']);
+        $user->setCityId($data['city_id']);
+        $user->setLocation($location);
+
+        return $user;
     }
 }
