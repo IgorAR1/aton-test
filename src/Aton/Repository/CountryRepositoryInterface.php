@@ -8,5 +8,5 @@ interface CountryRepositoryInterface extends RepositoryInterface
 {
     public function findOne(int $id): ?Country;
 
-    public function getAllForView(): array;
+    public function getFiltered(): array;
 }

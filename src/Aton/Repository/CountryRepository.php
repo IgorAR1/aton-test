@@ -92,7 +92,7 @@ class CountryRepository extends BaseRepository implements CountryRepositoryInter
         return $this->mapEntities($fetched);
     }
 
-    public function getAllForView(): array
+    public function getFiltered(): array
     {
         $qb = $this->queryBuilder();
 

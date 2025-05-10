@@ -34,13 +34,15 @@ class SingleFileCache extends FileCache
         }
 
         foreach ($file as $line) {
+            if (!$line) {
+                continue;
+            }
             $data = $this->unserialize($line);
-
             $key = $data['key'];
-            $expire = $data['expire'];
+            $expire = $data['expiration'];
 
-            if (isset($keys[$key]) && $expire > microtime(true)) {
-                unset($data['expire']);
+            if (in_array($key, $keys) && $expire > microtime(true)) {
+                unset($data['expiration']);
 
                 $result[] = $data;
             }
@@ -79,11 +81,9 @@ class SingleFileCache extends FileCache
                 $offset = ftell($h);
 
                 $line = fgets($h);
-
                 if (!$line) {
                     continue;
                 }
-
                 $data = $this->unserialize($line);
 
                 if ($data['key'] === $key) {

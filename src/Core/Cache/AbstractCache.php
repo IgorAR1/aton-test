@@ -16,7 +16,7 @@ abstract class AbstractCache implements CacheItemPoolInterface
     abstract protected function _delete(array $keys): bool;
     abstract protected function _clear(): bool;
 
-    protected function createCacheItem(string $key, ?string $value, bool $isHit): CacheItemInterface
+    protected function createCacheItem(string $key, mixed $value, bool $isHit): CacheItemInterface
     {
         return new CacheItem($key, $value, $isHit);
     }
@@ -24,13 +24,14 @@ abstract class AbstractCache implements CacheItemPoolInterface
     public function getItem(string $key): CacheItemInterface
     {
         $isHit = false;
-        $value = null;
+        $item['value'] = '';
 
-        foreach ($this->_fetch([$key]) as $value) {
+        foreach ($this->_fetch([$key]) as $item) {
             $isHit = true;
         }
 
-        return $this->createCacheItem($key, $value, $isHit);
+
+        return $this->createCacheItem($key, $item['value'], $isHit);
     }
 
     public function getItems(array $keys = []): iterable
@@ -38,8 +39,8 @@ abstract class AbstractCache implements CacheItemPoolInterface
         $items = [];
         $fetched = $this->_fetch($keys);
 
-        foreach ($fetched as $key => $value) {
-            $items[$key] = $this->createCacheItem($key, $value, true);
+        foreach ($fetched as $item) {
+            $items[$item['key']] = $this->createCacheItem($item['key'], $item['value'], true);
         }
 
         return $items;
@@ -104,8 +105,9 @@ abstract class AbstractCache implements CacheItemPoolInterface
     protected function unserialize(string $data): mixed
     {
         $data = trim($data);
+
         if (false === $data = unserialize($data)) {
-            throw new \Exception('Failed to unserialize data');
+            throw new \Exception('Failed to unserialize data' . ' ' . $data);
         }
 
         return $data;

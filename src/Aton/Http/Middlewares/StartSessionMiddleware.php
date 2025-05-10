@@ -15,6 +15,10 @@ class StartSessionMiddleware implements MiddlewareInterface
             session_start();
         }
 
-        return $handler->handle($request);
+        $response = $handler->handle($request);
+
+//        unset($_SESSION['errors']);
+
+        return $response;
     }
 }

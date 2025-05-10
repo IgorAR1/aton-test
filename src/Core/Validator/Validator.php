@@ -66,6 +66,16 @@ class Validator implements ValidatorInterface
         $this->errors[] = "{$value} must be a string";
     }
 
+    private function array(string $value): void
+    {
+        if (isset($this->data[$value]) && is_array($this->data[$value]) || $this->sometimes) {
+
+            return;
+        }
+
+        $this->errors[] = "{$value} must be an array";
+    }
+
     private function notBlank(string $value): void
     {
         if (isset($this->data[$value]) && !empty($this->data[$value]) || $this->sometimes) {

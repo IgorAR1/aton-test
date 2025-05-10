@@ -6,25 +6,56 @@ use App\Aton\Repository\CityRepositoryInterface;
 use App\Aton\Repository\UserRepositoryInterface;
 use App\Core\Http\Controllers\AbstractController;
 use App\Core\Validator\ValidatorInterface;
+
 //use App\Core\View\Engine;
 use GuzzleHttp\Psr7\Response;
 use Latte\Engine;
+use Psr\Cache\CacheItemPoolInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 final class UserController extends AbstractController
 {
-    public function __construct(Engine                               $renderEngine,
-                                protected UserRepositoryInterface    $userRepository,
-                                private CityRepositoryInterface      $cityRepository,
-                                private ValidatorInterface           $validator)
+    public function __construct(Engine                            $renderEngine,
+                                protected UserRepositoryInterface $userRepository,
+                                private CityRepositoryInterface   $cityRepository,
+                                private CacheItemPoolInterface    $cache,
+                                private ValidatorInterface        $validator)
     {
         parent::__construct($renderEngine);
     }
 
-    public function index(): Response
+    public function index(ServerRequestInterface $request): ResponseInterface
     {
-        $users = $this->userRepository->getAllForView();
+        $queryParams = $request->getQueryParams();
+
+        $errors = $this->validator->setRules([
+            'filter' => ['sometimes', 'array'],
+            'sort' => ['sometimes', 'string'],
+            'order' => ['sometimes', 'string'],
+        ])
+            ->validate($queryParams);
+
+        if (count($errors) > 0) {
+            return $this->redirect('/aton/users', $errors);
+        }
+
+        if (isset($queryParams['filter']) || isset($queryParams['sort'])) {//Условие - заглушка
+            $users = $this->userRepository->getAllForView();//Можно сортировать коллекции, но не понятно насколько эьл лучше
+
+            return $this->render("users.latte", ['users' => $users]);
+        }
+
+        $cacheItem = $this->cache->getItem('users');
+
+        if ($cacheItem->isHit()) {
+            $users = $cacheItem->get();
+        } else {
+            $users = $this->userRepository->findAll();
+
+            $cacheItem->set($users)->expiresAfter(3600);
+            $this->cache->save($cacheItem);
+        }
 
         return $this->render("users.latte", ['users' => $users]);
     }
@@ -87,7 +118,7 @@ final class UserController extends AbstractController
             return $this->render('users_create', $errors);
         }
 
-        $this->userRepository->update($id ,$data);
+        $this->userRepository->update($id, $data);
 
         return $this->redirect('/aton/users');
     }

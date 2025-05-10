@@ -11,6 +11,7 @@ use App\Core\Validator\ValidatorInterface;
 //use App\Core\View\Engine;
 use GuzzleHttp\Psr7\Response;
 use Latte\Engine;
+use Psr\Cache\CacheItemPoolInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -18,15 +19,44 @@ final class CityController extends AbstractController
 {
     public function __construct(Engine $renderEngine,
                                 private CityRepositoryInterface $cityRepository,
+                                private CacheItemPoolInterface     $cache,
                                 private CountryRepositoryInterface $countryRepository,
                                 private ValidatorInterface $validator)
     {
         parent::__construct($renderEngine);
     }
 
-    public function index(): Response
+    public function index(ServerRequestInterface $request): ResponseInterface
     {
-        $cities = $this->cityRepository->getAllForView();
+        $queryParams = $request->getQueryParams();
+
+        $errors = $this->validator->setRules([
+            'filter' => ['sometimes', 'array'],
+            'sort' => ['sometimes', 'string'],
+            'order' => ['sometimes', 'string'],
+        ])
+            ->validate($queryParams);
+
+        if (count($errors) > 0) {
+            return $this->redirect('/aton/cities', $errors);
+        }
+
+        if (isset($queryParams['filter']) || isset($queryParams['sort'])) {//Условие - заглушка
+            $cities = $this->cityRepository->getAllForView();//Можно сортировать коллекции, но не понятно насколько эьл лучше
+
+            return $this->render("cities.latte", ['cities' => $cities]);
+        }
+
+        $cacheItem = $this->cache->getItem('cities');
+
+        if ($cacheItem->isHit()) {
+            $cities = $cacheItem->get();
+        } else {
+            $cities = $this->cityRepository->findAll();
+
+            $cacheItem->set($cities)->expiresAfter(3600);
+            $this->cache->save($cacheItem);
+        }
 
         return $this->render("cities.latte", ['cities' => $cities]);
     }

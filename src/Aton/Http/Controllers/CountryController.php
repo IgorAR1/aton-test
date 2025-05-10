@@ -3,6 +3,7 @@
 namespace App\Aton\Http\Controllers;
 
 use App\Aton\Repository\CountryRepositoryInterface;
+use App\Aton\Service\CountryService;
 use App\Core\Cache\CacheItem;
 use App\Core\Cache\FileSystem\FileCache;
 use App\Core\Cache\FileSystem\SingleFileCache;
@@ -18,26 +19,46 @@ use Psr\Http\Message\ServerRequestInterface;
 
 final class CountryController extends AbstractController
 {
-    public function __construct(Engine $renderEngine,
-                                private CacheItemPoolInterface $cache,
+    public function __construct(Engine                             $renderEngine,
+                                private CacheItemPoolInterface     $cache,
                                 private CountryRepositoryInterface $countryRepository,
-                                private ValidatorInterface $validator)
+//                                private CountryService             $service,
+                                private ValidatorInterface         $validator)
     {
         parent::__construct($renderEngine);
     }
 
-    public function index(): Response
+    public function index(ServerRequestInterface $request): ResponseInterface
     {
-        $country = $this->countryRepository->findOne(1);
+        $queryParams = $request->getQueryParams();
 
-        $cache = new CacheItem('countries', $country);
-        $cache = $cache->expiresAfter(333333343);
+        $errors = $this->validator->setRules([
+            'filter' => ['sometimes', 'array'],
+            'sort' => ['sometimes', 'string'],
+            'order' => ['sometimes', 'string'],
+        ])
+            ->validate($queryParams);
 
-        $this->cache->save($cache);
+        if (count($errors) > 0) {
+            return $this->redirect('/aton/countries', $errors);
+        }
 
-        $countries = $this->countryRepository->getAllForView();
+        if (isset($queryParams['filter']) || isset($queryParams['sort'])) {//Условие - заглушка
+            $countries = $this->countryRepository->getFiltered();//Можно сортировать коллекции, но не понятно насколько эьл лучше
 
-        $this->cache->hasItem('key');
+            return $this->render("countries.latte", ['countries' => $countries]);
+        }
+
+        $cacheItem = $this->cache->getItem('countries');
+
+        if ($cacheItem->isHit()) {
+            $countries = $cacheItem->get();
+        } else {
+            $countries = $this->countryRepository->findAll();
+
+            $cacheItem->set($countries)->expiresAfter(3600);
+            $this->cache->save($cacheItem);
+        }
 
         return $this->render("countries.latte", ['countries' => $countries]);
     }
@@ -86,7 +107,7 @@ final class CountryController extends AbstractController
             return $this->redirect("/aton/countries/edit/{$id}", $errors);
         }
 
-        $this->countryRepository->update($id,$data);
+        $this->countryRepository->update($id, $data);
 
         return $this->redirect('/aton/countries');
     }

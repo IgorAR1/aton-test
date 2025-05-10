@@ -28,4 +28,5 @@ abstract class AbstractController
 
         return (new Response(302, ['Location' => $to]));
     }
+
 }
