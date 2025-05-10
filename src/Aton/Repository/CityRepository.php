@@ -98,7 +98,7 @@ class CityRepository extends BaseRepository implements CityRepositoryInterface
         return $this->mapEntities($fetched);
     }
 
-    public function getAllForView(): array
+    public function getFiltered(): array
     {
         $qb = $this->queryBuilder();
 

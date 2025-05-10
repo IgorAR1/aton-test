@@ -4,6 +4,7 @@ namespace App\Aton\Http\Controllers;
 
 use App\Aton\Repository\CityRepositoryInterface;
 use App\Aton\Repository\UserRepositoryInterface;
+use App\Aton\Service\UserService;
 use App\Core\Http\Controllers\AbstractController;
 use App\Core\Validator\ValidatorInterface;
 
@@ -19,7 +20,8 @@ final class UserController extends AbstractController
     public function __construct(Engine                            $renderEngine,
                                 protected UserRepositoryInterface $userRepository,
                                 private CityRepositoryInterface   $cityRepository,
-                                private CacheItemPoolInterface    $cache,
+//                                private CacheItemPoolInterface    $cache,
+                                private UserService               $userService,
                                 private ValidatorInterface        $validator)
     {
         parent::__construct($renderEngine);
@@ -40,22 +42,8 @@ final class UserController extends AbstractController
             return $this->redirect('/aton/users', $errors);
         }
 
-        if (isset($queryParams['filter']) || isset($queryParams['sort'])) {//Условие - заглушка
-            $users = $this->userRepository->getAllForView();//Можно сортировать коллекции, но не понятно насколько эьл лучше
+        $users = $this->userService->getForView($queryParams);
 
-            return $this->render("users.latte", ['users' => $users]);
-        }
-
-        $cacheItem = $this->cache->getItem('users');
-
-        if ($cacheItem->isHit()) {
-            $users = $cacheItem->get();
-        } else {
-            $users = $this->userRepository->findAll();
-
-            $cacheItem->set($users)->expiresAfter(3600);
-            $this->cache->save($cacheItem);
-        }
 
         return $this->render("users.latte", ['users' => $users]);
     }

@@ -107,7 +107,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         return $this->mapEntities($fetched);
     }
 
-    public function getAllForView(): array
+    public function getFiltered(): array
     {
         $qb = $this->queryBuilder();
 

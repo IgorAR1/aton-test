@@ -22,7 +22,7 @@ final class CountryController extends AbstractController
     public function __construct(Engine                             $renderEngine,
                                 private CacheItemPoolInterface     $cache,
                                 private CountryRepositoryInterface $countryRepository,
-//                                private CountryService             $service,
+                                private CountryService             $countryService,
                                 private ValidatorInterface         $validator)
     {
         parent::__construct($renderEngine);
@@ -43,22 +43,7 @@ final class CountryController extends AbstractController
             return $this->redirect('/aton/countries', $errors);
         }
 
-        if (isset($queryParams['filter']) || isset($queryParams['sort'])) {//Условие - заглушка
-            $countries = $this->countryRepository->getFiltered();//Можно сортировать коллекции, но не понятно насколько эьл лучше
-
-            return $this->render("countries.latte", ['countries' => $countries]);
-        }
-
-        $cacheItem = $this->cache->getItem('countries');
-
-        if ($cacheItem->isHit()) {
-            $countries = $cacheItem->get();
-        } else {
-            $countries = $this->countryRepository->findAll();
-
-            $cacheItem->set($countries)->expiresAfter(3600);
-            $this->cache->save($cacheItem);
-        }
+        $countries = $this->countryService->getForView($queryParams);
 
         return $this->render("countries.latte", ['countries' => $countries]);
     }

@@ -7,7 +7,7 @@ use App\Aton\Entity\Country;
 
 interface CityRepositoryInterface extends RepositoryInterface
 {
-    public function getAllForView(): array;
+    public function getFiltered(): array;
 
     public function findOne(int $id): ?City;
 

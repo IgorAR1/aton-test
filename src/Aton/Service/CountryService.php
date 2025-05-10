@@ -15,7 +15,7 @@ class CountryService
 
     public function getForView(array $queryParam): array
     {
-        if (isset($queryParam['filter']) || isset($queryParam['sort'])) {//Условие - заглушка
+        if (isset($queryParam['filter']) || isset($queryParam['sort'])) {//TODO Условие - заглушка \\мб наружу
 
             return $this->countryRepository->getFiltered();
         }
@@ -25,13 +25,9 @@ class CountryService
         if ($cacheItem->isHit()) {
 
             return $cacheItem->get();
-//            if (isset($queryParam['filter'])) {
-//                $countries = array_filter($countries, function ($item) use ($queryParam) { ////У меня вопрос  - что лучше: сходить в бд с фильтрами - или отфильтровать коллекцию?
-//                    foreach ($queryParam['filter'] as $key => $value) {}
-//                });
-//            }
+
         } else {
-            $countries = $this->countryRepository->getFiltered();
+            $countries = $this->countryRepository->findAll();
 
             $cacheItem->set($countries)->expiresAfter(3600);
             $this->cache->save($cacheItem);

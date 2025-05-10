@@ -6,6 +6,7 @@ use App\Aton\DTOs\CreateCityDTO;
 use App\Aton\DTOs\UpdateCityDTO;
 use App\Aton\Repository\CityRepositoryInterface;
 use App\Aton\Repository\CountryRepositoryInterface;
+use App\Aton\Service\CityService;
 use App\Core\Http\Controllers\AbstractController;
 use App\Core\Validator\ValidatorInterface;
 //use App\Core\View\Engine;
@@ -19,7 +20,8 @@ final class CityController extends AbstractController
 {
     public function __construct(Engine $renderEngine,
                                 private CityRepositoryInterface $cityRepository,
-                                private CacheItemPoolInterface     $cache,
+//                                private CacheItemPoolInterface     $cache,
+                                private CityService $cityService,
                                 private CountryRepositoryInterface $countryRepository,
                                 private ValidatorInterface $validator)
     {
@@ -41,22 +43,7 @@ final class CityController extends AbstractController
             return $this->redirect('/aton/cities', $errors);
         }
 
-        if (isset($queryParams['filter']) || isset($queryParams['sort'])) {//Условие - заглушка
-            $cities = $this->cityRepository->getAllForView();//Можно сортировать коллекции, но не понятно насколько эьл лучше
-
-            return $this->render("cities.latte", ['cities' => $cities]);
-        }
-
-        $cacheItem = $this->cache->getItem('cities');
-
-        if ($cacheItem->isHit()) {
-            $cities = $cacheItem->get();
-        } else {
-            $cities = $this->cityRepository->findAll();
-
-            $cacheItem->set($cities)->expiresAfter(3600);
-            $this->cache->save($cacheItem);
-        }
+        $cities = $this->cityService->getForView($queryParams);
 
         return $this->render("cities.latte", ['cities' => $cities]);
     }
