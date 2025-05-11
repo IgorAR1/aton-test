@@ -4,7 +4,6 @@ namespace App\Aton\Http\Controllers;
 
 use App\Aton\Repository\CityRepositoryInterface;
 use App\Aton\Repository\CountryRepositoryInterface;
-use App\Aton\Service\CityService;
 use App\Core\Cache\CacheInterface;
 use App\Core\Http\Controllers\AbstractController;
 use App\Core\Validator\ValidatorInterface;
@@ -15,11 +14,11 @@ use Psr\Http\Message\ServerRequestInterface;
 
 final class CityController extends AbstractController
 {
-    public function __construct(Engine $renderEngine,
-                                private CityRepositoryInterface $cityRepository,
-                                private CacheInterface     $cache,
+    public function __construct(Engine                             $renderEngine,
+                                private CityRepositoryInterface    $cityRepository,
+                                private CacheInterface             $cache,
                                 private CountryRepositoryInterface $countryRepository,
-                                private ValidatorInterface $validator)
+                                private ValidatorInterface         $validator)
     {
         parent::__construct($renderEngine);
     }
@@ -38,10 +37,13 @@ final class CityController extends AbstractController
         if (count($errors) > 0) {
             return $this->redirect('/aton/cities', $errors);
         }
-
-        $cities = $this->cache->get('cities', function (){
-            return $this->cityRepository->getAll();
-        });
+        if (isset($queryParams['filter']) || isset($queryParams['sort']) || isset($queryParams['order'])) { ///Затычка
+            $cities = $this->cityRepository->getFiltered();
+        } else {
+            $cities = $this->cache->get('cities', function () {
+                return $this->cityRepository->getAll();
+            });
+        }
 
         return $this->render("cities.latte", ['cities' => $cities]);
     }
@@ -50,7 +52,7 @@ final class CityController extends AbstractController
     {
         $countries = $this->countryRepository->getAll();
 
-        return $this->render('cities_create.latte',['countries' => $countries]);
+        return $this->render('cities_create.latte', ['countries' => $countries]);
     }
 
     public function edit(int $id): ResponseInterface
@@ -101,7 +103,7 @@ final class CityController extends AbstractController
             return $this->redirect("/aton/cities/edit/{$id}", $errors);
         }
 
-        $this->cityRepository->update($id,$data);
+        $this->cityRepository->update($id, $data);
 
         return $this->redirect('/aton/cities');
     }

@@ -118,10 +118,9 @@ final class Template_bdad8f8e85 extends Latte\Runtime\Template
 		echo '</table>
 
 <script>
-    document.getElementById(\'filterForm\').addEventListener(\'submit\', function (e) {
+    document.getElementById(\'userFilterForm\').addEventListener(\'submit\', function (e) {
         const form = e.target;
 
-        // 1. Отключаем невыбранные фильтры
         const checkboxes = form.querySelectorAll(\'input[type=checkbox][data-filter]\');
         checkboxes.forEach(checkbox => {
             const fieldName = checkbox.dataset.filter;
@@ -135,7 +134,6 @@ final class Template_bdad8f8e85 extends Latte\Runtime\Template
             }
         });
 
-        // 2. Отключаем sort/order если не выбраны
         const sort = form.querySelector(\'[name="sort"]\');
         const order = form.querySelector(\'[name="order"]\');
 
@@ -146,8 +144,7 @@ final class Template_bdad8f8e85 extends Latte\Runtime\Template
         }
 
     });
-</script>
-';
+</script>';
 	}
 
 

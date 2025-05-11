@@ -59,10 +59,9 @@
 </table>
 
 <script n:syntax="off">
-    document.getElementById('filterForm').addEventListener('submit', function (e) {
+    document.getElementById('userFilterForm').addEventListener('submit', function (e) {
         const form = e.target;
 
-        // 1. Отключаем невыбранные фильтры
         const checkboxes = form.querySelectorAll('input[type=checkbox][data-filter]');
         checkboxes.forEach(checkbox => {
             const fieldName = checkbox.dataset.filter;
@@ -76,7 +75,6 @@
             }
         });
 
-        // 2. Отключаем sort/order если не выбраны
         const sort = form.querySelector('[name="sort"]');
         const order = form.querySelector('[name="order"]');
 

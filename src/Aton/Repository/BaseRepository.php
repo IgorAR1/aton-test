@@ -33,35 +33,6 @@ abstract class BaseRepository implements RepositoryInterface
         return $result;
     }
 
-//    public function findAll(): array
-//    {
-//        $q = $this->queryBuilder->select("*")
-//            ->from(static::$table, 't')
-//            ->getQuery();
-//
-//
-//        $stmt = $this->connection->query($q);
-//
-//        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-//    }
-
-//    public function findOne(int $id): array
-//    {
-//        $qb = $this->queryBuilder();
-//
-//        $q = $qb->select("*")
-//            ->from(static::$table, 't')
-//            ->where('id = :id')
-//            ->setParameter('id', $id)
-//            ->getQuery();
-//
-//        $stmt = $this->connection->prepare($q);
-//
-//        $stmt->execute($qb->getQueryParams());
-//
-//        return $stmt->fetch(\PDO::FETCH_ASSOC);
-//    }
-
     public function delete(int $id): bool
     {
         $qb = $this->queryBuilder();
@@ -72,13 +43,4 @@ abstract class BaseRepository implements RepositoryInterface
 
         return $stmt->execute($qb->getQueryParams());
     }
-
-//    protected function execute(string $sql, array $params = []): bool
-//    {
-//        $stmt = $this->connection->prepare($sql);
-//
-//        return $stmt->execute($params);
-//    }
-
-
 }

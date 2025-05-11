@@ -6,20 +6,28 @@ use SplFileObject;
 
 class SingleFileCache extends FileCache
 {
-    public function __construct(private string $fileName, ?string $directory = null)
+    private string $file;
+
+    public function __construct(string $fileName, ?string $directory = null)
     {
         parent::__construct($directory);
 
-        $this->fileName = $this->directory . \DIRECTORY_SEPARATOR . $this->fileName;
+        $this->file = $this->directory . \DIRECTORY_SEPARATOR . $fileName;
 
-        if (!is_file($this->fileName)) {
-            throw new \Exception($this->fileName . ' does not exist'); //TODO: или создать ?
+        if (!is_file($this->file)) {
+            fclose(fopen($this->file, 'w'));
         }
     }
 
     protected function getFile(): string
     {
-        return $this->fileName;
+        $file = $this->file;
+
+//        if (!is_file($file)) {
+//            fclose(fopen($file, 'w'));
+//        }
+
+        return $file;
     }
 
     protected function _fetch(array $keys): iterable
@@ -27,7 +35,7 @@ class SingleFileCache extends FileCache
         $result = [];
 
         try {
-            $file = new SplFileObject($this->fileName, 'r');
+            $file = new SplFileObject($this->getFile(), 'r');
         } catch (\Exception $exception) {
             return $result;
         }
@@ -54,13 +62,15 @@ class SingleFileCache extends FileCache
     {
         $failed = [];
 
+        $file = $this->getFile();
+
         foreach ($data as $record) {
             if (false !== $offset = $this->findOffsetPosition($record['key'])) {
-                if (!$this->_rewrite($this->fileName, serialize($record) . "\n", $offset)) {
+                if (!$this->_rewrite($file, serialize($record) . "\n", $offset)) {
                     $failed[$record['key']] = $record['value'];
                 }
             } else {
-                if (!$this->_write($this->fileName, serialize($record) . "\n")) {
+                if (!$this->_write($file, serialize($record) . "\n")) {
                     $failed[$record['key']] = $record['value'];
                 }
             }
@@ -74,7 +84,7 @@ class SingleFileCache extends FileCache
         set_error_handler(static fn($type, $message, $file, $line) => throw new \ErrorException($message, 0, $type, $file, $line));
 
         try {
-            $h = fopen($this->fileName, 'r');
+            $h = fopen($this->getFile(), 'r');
 
             while (!feof($h)) {
                 $offset = ftell($h);
@@ -174,7 +184,7 @@ class SingleFileCache extends FileCache
 
         foreach ($keys as $key) {
             if (false !== $offset = $this->findOffsetPosition($key)) {
-                $ok = $this->_rewrite($this->fileName, '', $offset) && $ok;
+                $ok = $this->_rewrite($this->file, '', $offset) && $ok;
             }
         }
 
@@ -183,6 +193,12 @@ class SingleFileCache extends FileCache
 
     public function _clear(): bool
     {
-        return rmdir($this->directory, true);
+        $ok = @unlink($this->file);
+
+        if ($ok) {
+            fclose(fopen($this->file, 'w'));///Точно?
+        }
+
+        return $ok;
     }
 }

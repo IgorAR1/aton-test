@@ -52,16 +52,8 @@ final class Template_ea19e92d56 extends Latte\Runtime\Template
 
     <select name="sort">
         <option value="">Без сортировки</option>
-        <option value="id" ';
-		if (($sort ?? '') === 'id') /* line 28 */ {
-			echo 'selected';
-		}
-		echo '>Сортировать по ID</option>
-        <option value="country" ';
-		if (($sort ?? '') === 'country') /* line 29 */ {
-			echo 'selected';
-		}
-		echo '>Сортировать по названию страны</option>
+        <option value="id" >Сортировать по ID</option>
+        <option value="country">Сортировать по названию страны</option>
     </select>
 
     <select name="order">
@@ -105,7 +97,6 @@ final class Template_ea19e92d56 extends Latte\Runtime\Template
     document.getElementById(\'filterForm\').addEventListener(\'submit\', function (e) {
         const form = e.target;
 
-        // 1. Отключаем невыбранные фильтры
         const checkboxes = form.querySelectorAll(\'input[type=checkbox][data-filter]\');
         checkboxes.forEach(checkbox => {
             const fieldName = checkbox.dataset.filter;
@@ -119,7 +110,6 @@ final class Template_ea19e92d56 extends Latte\Runtime\Template
             }
         });
 
-        // 2. Отключаем sort/order если не выбраны
         const sort = form.querySelector(\'[name="sort"]\');
         const order = form.querySelector(\'[name="order"]\');
 

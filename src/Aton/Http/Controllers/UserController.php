@@ -4,15 +4,11 @@ namespace App\Aton\Http\Controllers;
 
 use App\Aton\Repository\CityRepositoryInterface;
 use App\Aton\Repository\UserRepositoryInterface;
-use App\Aton\Service\UserService;
 use App\Core\Cache\CacheInterface;
 use App\Core\Http\Controllers\AbstractController;
 use App\Core\Validator\ValidatorInterface;
-
 //use App\Core\View\Engine;
-use GuzzleHttp\Psr7\Response;
 use Latte\Engine;
-use Psr\Cache\CacheItemPoolInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -21,7 +17,7 @@ final class UserController extends AbstractController
     public function __construct(Engine                            $renderEngine,
                                 protected UserRepositoryInterface $userRepository,
                                 private CityRepositoryInterface   $cityRepository,
-                                private CacheInterface             $cache,
+                                private CacheInterface            $cache,
                                 private ValidatorInterface        $validator)
     {
         parent::__construct($renderEngine);
@@ -42,10 +38,13 @@ final class UserController extends AbstractController
             return $this->redirect('/aton/users', $errors);
         }
 
-        $users = $this->cache->get('users', function (){
-            return $this->userRepository->getAll();
-        });
-
+        if (isset($queryParams['filter']) || isset($queryParams['sort']) || isset($queryParams['order'])) { ///Затычка
+            $users = $this->userRepository->getFiltered();
+        } else {
+            $users = $this->cache->get('users', function () {
+                return $this->userRepository->getAll();
+            });
+        }
         return $this->render("users.latte", ['users' => $users]);
     }
 

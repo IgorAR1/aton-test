@@ -3,16 +3,10 @@
 namespace App\Aton\Http\Controllers;
 
 use App\Aton\Repository\CountryRepositoryInterface;
-use App\Aton\Service\CountryService;
 use App\Core\Cache\CacheInterface;
-use App\Core\Cache\CacheItem;
-use App\Core\Cache\FileSystem\FileCache;
-use App\Core\Cache\FileSystem\SingleFileCache;
 use App\Core\Http\Controllers\AbstractController;
 use App\Core\Validator\ValidatorInterface;
-use GuzzleHttp\Psr7\Response;
 use Latte\Engine;
-use Psr\Cache\CacheItemPoolInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -43,9 +37,13 @@ final class CountryController extends AbstractController
             return $this->redirect('/aton/countries', $errors);
         }
 
-        $countries = $this->cache->get('cities', function () {
-            return $this->countryRepository->getAll();
-        });
+        if (isset($queryParams['filter']) || isset($queryParams['sort']) || isset($queryParams['order'])) { ///Затычка
+            $countries = $this->countryRepository->getFiltered();
+        } else {
+            $countries = $this->cache->get('cities', function () {
+                return $this->countryRepository->getAll();
+            });
+        }
 
         return $this->render("countries.latte", ['countries' => $countries]);
     }
@@ -91,7 +89,7 @@ final class CountryController extends AbstractController
             ->validate($data);
 
         if (count($errors) > 0) {
-            return $this->redirect("/aton/countries/edit/{$id}", $errors);
+            return $this->redirect("/aton/countries/edit/$id", $errors);
         }
 
         $this->countryRepository->update($id, $data);

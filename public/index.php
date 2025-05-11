@@ -1,5 +1,6 @@
 <?php
 
+use App\Aton\Http\Middlewares\ClearCacheMiddleware;
 use App\Aton\Http\Middlewares\StartSessionMiddleware;
 use App\Aton\ServiceProviders\AppServiceProviders;
 use App\Core\Cache\CacheServiceProvider;
@@ -24,7 +25,8 @@ $app->withProviders([
     LoggerServiceProvider::class,
     AppServiceProviders::class
 ])->withMiddlewares([
-    StartSessionMiddleware::class
+    StartSessionMiddleware::class,
+    ClearCacheMiddleware::class
 ])->handleRequest($request);
 
 

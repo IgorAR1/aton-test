@@ -147,5 +147,4 @@ class CityRepository extends BaseRepository implements CityRepositoryInterface
 
         return $city;
     }
-
 }
