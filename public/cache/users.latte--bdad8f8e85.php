@@ -146,7 +146,8 @@ final class Template_bdad8f8e85 extends Latte\Runtime\Template
         }
 
     });
-</script>';
+</script>
+';
 	}
 
 

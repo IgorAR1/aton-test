@@ -12,10 +12,12 @@ use App\Aton\Sorters\AbstractSorter;
 use App\Aton\Sorters\Sorter;
 use App\Core\Cache\FileSystem\FileCache;
 use App\Core\Cache\FileSystem\SingleFileCache;
+use App\Core\Cache\SimpleCache;
 use App\Core\Support\ServiceProvider\ServiceProvider;
 use App\Core\Validator\Validator;
 use App\Core\Validator\ValidatorInterface;
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\SimpleCache\CacheInterface;
 
 class AppServiceProviders extends ServiceProvider
 {
@@ -33,5 +35,6 @@ class AppServiceProviders extends ServiceProvider
         $this->application->bind(CacheItemPoolInterface::class,function (){
             return new SingleFileCache('cache','/var/www/aton/cache2');
         });
+        $this->application->bind(CacheInterface::class,SimpleCache::class);
     }
 }

@@ -104,19 +104,33 @@ final class Template_28e9f1e1ea extends Latte\Runtime\Template
 		echo '</table>
 
 <script>
-    document.getElementById(\'cityFilterForm\').addEventListener(\'submit\', function (e) {
+    document.getElementById(\'filterForm\').addEventListener(\'submit\', function (e) {
         const form = e.target;
-        const checkboxes = form.querySelectorAll(\'input[type=checkbox][data-filter]\');
 
+        // 1. Отключаем невыбранные фильтры
+        const checkboxes = form.querySelectorAll(\'input[type=checkbox][data-filter]\');
         checkboxes.forEach(checkbox => {
             const fieldName = checkbox.dataset.filter;
             const input = form.querySelector(`[name="filter[${fieldName}]"]`);
+            const isChecked = checkbox.checked;
+            const isEmpty = input && input.value.trim() === \'\';
 
-            if (!checkbox.checked) {
+            if (!isChecked || isEmpty) {
                 if (input) input.disabled = true;
                 checkbox.disabled = true;
             }
         });
+
+        // 2. Отключаем sort/order если не выбраны
+        const sort = form.querySelector(\'[name="sort"]\');
+        const order = form.querySelector(\'[name="order"]\');
+
+        if (!sort.value) {
+            sort.disabled = true;
+            order.disabled = true;
+
+        }
+
     });
 </script>
 ';

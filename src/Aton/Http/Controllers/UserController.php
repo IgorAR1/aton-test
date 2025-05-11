@@ -5,6 +5,7 @@ namespace App\Aton\Http\Controllers;
 use App\Aton\Repository\CityRepositoryInterface;
 use App\Aton\Repository\UserRepositoryInterface;
 use App\Aton\Service\UserService;
+use App\Core\Cache\CacheInterface;
 use App\Core\Http\Controllers\AbstractController;
 use App\Core\Validator\ValidatorInterface;
 
@@ -20,8 +21,7 @@ final class UserController extends AbstractController
     public function __construct(Engine                            $renderEngine,
                                 protected UserRepositoryInterface $userRepository,
                                 private CityRepositoryInterface   $cityRepository,
-//                                private CacheItemPoolInterface    $cache,
-                                private UserService               $userService,
+                                private CacheInterface             $cache,
                                 private ValidatorInterface        $validator)
     {
         parent::__construct($renderEngine);
@@ -42,15 +42,16 @@ final class UserController extends AbstractController
             return $this->redirect('/aton/users', $errors);
         }
 
-        $users = $this->userService->getForView($queryParams);
-
+        $users = $this->cache->get('users', function (){
+            return $this->userRepository->getAll();
+        });
 
         return $this->render("users.latte", ['users' => $users]);
     }
 
     public function create(): ResponseInterface
     {
-        $cities = $this->cityRepository->findAll();
+        $cities = $this->cityRepository->getAll();
 
         return $this->render('user_create.latte', ['cities' => $cities]);
     }
@@ -64,7 +65,7 @@ final class UserController extends AbstractController
             return $this->render("404", status: 404);
         }
 
-        $cities = $this->cityRepository->findAll();
+        $cities = $this->cityRepository->getAll();
 
         return $this->render('users_edit.latte', ['user' => $user, 'cities' => $cities]);
     }

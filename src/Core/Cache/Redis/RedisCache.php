@@ -6,7 +6,7 @@ namespace App\Core\Cache\Redis;
 use App\Core\Cache\AbstractCache;
 use Psr\Cache\CacheItemInterface;
 use Redis;
-
+//TODO полностью переделать
 final class RedisCache extends AbstractCache
 {
     private array $deferredItems;

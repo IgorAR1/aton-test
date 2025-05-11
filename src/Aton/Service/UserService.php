@@ -28,7 +28,7 @@ class UserService
             return $cacheItem->get();
 
         } else {
-            $users = $this->userRepository->findAll();
+            $users = $this->userRepository->getAll();
 
             $cacheItem->set($users)->expiresAfter(3600);
             $this->cache->save($cacheItem);

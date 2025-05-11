@@ -4,6 +4,7 @@ namespace App\Aton\Http\Controllers;
 
 use App\Aton\Repository\CountryRepositoryInterface;
 use App\Aton\Service\CountryService;
+use App\Core\Cache\CacheInterface;
 use App\Core\Cache\CacheItem;
 use App\Core\Cache\FileSystem\FileCache;
 use App\Core\Cache\FileSystem\SingleFileCache;
@@ -20,9 +21,8 @@ use Psr\Http\Message\ServerRequestInterface;
 final class CountryController extends AbstractController
 {
     public function __construct(Engine                             $renderEngine,
-                                private CacheItemPoolInterface     $cache,
+                                private CacheInterface             $cache,
                                 private CountryRepositoryInterface $countryRepository,
-                                private CountryService             $countryService,
                                 private ValidatorInterface         $validator)
     {
         parent::__construct($renderEngine);
@@ -43,7 +43,9 @@ final class CountryController extends AbstractController
             return $this->redirect('/aton/countries', $errors);
         }
 
-        $countries = $this->countryService->getForView($queryParams);
+        $countries = $this->cache->get('cities', function () {
+            return $this->countryRepository->getAll();
+        });
 
         return $this->render("countries.latte", ['countries' => $countries]);
     }

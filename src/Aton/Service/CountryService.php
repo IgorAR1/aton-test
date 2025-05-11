@@ -27,7 +27,7 @@ class CountryService
             return $cacheItem->get();
 
         } else {
-            $countries = $this->countryRepository->findAll();
+            $countries = $this->countryRepository->getAll();
 
             $cacheItem->set($countries)->expiresAfter(3600);
             $this->cache->save($cacheItem);

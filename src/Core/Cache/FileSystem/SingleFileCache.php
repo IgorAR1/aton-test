@@ -6,7 +6,6 @@ use SplFileObject;
 
 class SingleFileCache extends FileCache
 {
-
     public function __construct(private string $fileName, ?string $directory = null)
     {
         parent::__construct($directory);

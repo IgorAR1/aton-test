@@ -81,7 +81,7 @@ class CityRepository extends BaseRepository implements CityRepositoryInterface
         return $this->mapEntity($fetched);
     }
 
-    public function findAll(): array
+    public function getAll(): array
     {
         $qb = $this->queryBuilder();
 

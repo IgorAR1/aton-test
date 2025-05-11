@@ -2,15 +2,18 @@
 
 namespace App\Aton\Service;
 
+use App\Aton\Entity\City;
+use App\Aton\Events\CityCreated;
+use App\Aton\Events\CityUpdated;
 use App\Aton\Repository\CityRepositoryInterface;
-use App\Aton\Repository\CountryRepository;
-use App\Core\Cache\CacheItem;
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\EventDispatcher\EventDispatcherInterface;
 
 class CityService
 {
-    public function __construct(readonly CityRepositoryInterface     $cityRepository,
-                                private CacheItemPoolInterface $cache,)
+    public function __construct(readonly CityRepositoryInterface $cityRepository,
+                                private CacheItemPoolInterface   $cache,
+                                private EventDispatcherInterface $eventDispatcher)
     {
     }
 
@@ -29,12 +32,40 @@ class CityService
             return $cacheItem->get();
 
         } else {
-            $cities= $this->cityRepository->findAll();
+            $cities = $this->cityRepository->getAll();
 
             $cacheItem->set($cities)->expiresAfter(3600);
             $this->cache->save($cacheItem);
         }
 
         return $cities;
+    }
+
+    public function getCached(int $id): ?City
+    {
+        $cacheItem = $this->cache->getItem("cities:$id");
+
+        if ($cacheItem->isHit()) {
+            $city = $cacheItem->get();
+            if ($city instanceof City) {
+                return $city;
+            }
+        }
+
+        return null;
+    }
+
+    public function create(array $data)
+    {
+        $this->cityRepository->create($data);
+
+        $this->eventDispatcher->dispatch(new CityCreated());
+    }
+
+    public function update(int $id, array $data)
+    {
+        $this->cityRepository->update($id, $data);
+
+        $this->eventDispatcher->dispatch(new CityUpdated);
     }
 }

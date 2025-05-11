@@ -2,17 +2,14 @@
 
 namespace App\Aton\Http\Controllers;
 
-use App\Aton\DTOs\CreateCityDTO;
-use App\Aton\DTOs\UpdateCityDTO;
 use App\Aton\Repository\CityRepositoryInterface;
 use App\Aton\Repository\CountryRepositoryInterface;
 use App\Aton\Service\CityService;
+use App\Core\Cache\CacheInterface;
 use App\Core\Http\Controllers\AbstractController;
 use App\Core\Validator\ValidatorInterface;
 //use App\Core\View\Engine;
-use GuzzleHttp\Psr7\Response;
 use Latte\Engine;
-use Psr\Cache\CacheItemPoolInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -20,8 +17,7 @@ final class CityController extends AbstractController
 {
     public function __construct(Engine $renderEngine,
                                 private CityRepositoryInterface $cityRepository,
-//                                private CacheItemPoolInterface     $cache,
-                                private CityService $cityService,
+                                private CacheInterface     $cache,
                                 private CountryRepositoryInterface $countryRepository,
                                 private ValidatorInterface $validator)
     {
@@ -43,14 +39,16 @@ final class CityController extends AbstractController
             return $this->redirect('/aton/cities', $errors);
         }
 
-        $cities = $this->cityService->getForView($queryParams);
+        $cities = $this->cache->get('cities', function (){
+            return $this->cityRepository->getAll();
+        });
 
         return $this->render("cities.latte", ['cities' => $cities]);
     }
 
     public function create(): ResponseInterface
     {
-        $countries = $this->countryRepository->findAll();
+        $countries = $this->countryRepository->getAll();
 
         return $this->render('cities_create.latte',['countries' => $countries]);
     }
@@ -63,7 +61,7 @@ final class CityController extends AbstractController
             return $this->render("404", status: 404);
         }
 
-        $countries = $this->countryRepository->findAll();
+        $countries = $this->countryRepository->getAll();
 
         return $this->render('cities_edit.latte', ['city' => $city, 'countries' => $countries]);
     }

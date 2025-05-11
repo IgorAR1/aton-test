@@ -6,6 +6,7 @@ use App\Core\Cache\AbstractCache;
 
 abstract class FileCache extends AbstractCache
 {
+    //TODO ненужный класс
     protected string $directory;
 
     public function __construct(?string $directory = null)

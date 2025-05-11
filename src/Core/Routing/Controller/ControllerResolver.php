@@ -28,7 +28,7 @@ final class ControllerResolver
 
             try {
                 $instance = $this->parametersResolver->get($definition);
-            } catch (NotFoundContainerException $e) {//????
+            } catch (NotFoundContainerException $e) {//????TODO баг
                 throw new NotFoundContainerException("Controller {$definition} does not exist.");
             }
 

@@ -5,7 +5,7 @@ namespace App\Core\Cache;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 
-abstract class AbstractCache implements CacheItemPoolInterface
+abstract class AbstractCache implements CacheInterface, CacheItemPoolInterface
 {
     private array $deferredItems = [];
 
@@ -19,6 +19,23 @@ abstract class AbstractCache implements CacheItemPoolInterface
     protected function createCacheItem(string $key, mixed $value, bool $isHit): CacheItemInterface
     {
         return new CacheItem($key, $value, $isHit);
+    }
+
+    public function get(string $key, callable $callback): mixed
+    {
+        $cacheItem = $this->getItem($key);
+
+        if ($cacheItem->isHit()) {
+
+            return $cacheItem->get();
+        } else {
+           $value = $callback();
+           $cacheItem->set($value);
+
+           $this->save($cacheItem);
+        }
+
+        return $value;
     }
 
     public function getItem(string $key): CacheItemInterface

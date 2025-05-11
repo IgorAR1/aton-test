@@ -48,7 +48,7 @@ class Validator implements ValidatorInterface
         return $this->errors;
     }
 
-    //Для простоты так
+    //Минус OCP, Для простоты так
     private function required(string $value): void
     {
         if (!isset($this->data[$value])) {
@@ -58,31 +58,25 @@ class Validator implements ValidatorInterface
 
     private function string(string $value): void
     {
-        if (isset($this->data[$value]) && is_string($this->data[$value]) || $this->sometimes) {
-
-            return;
+        if (!$this->sometimes && (!isset($this->data[$value]) || !is_string($this->data[$value]))) {
+            $this->errors[] = "{$value} must be a string";
         }
 
-        $this->errors[] = "{$value} must be a string";
     }
 
     private function array(string $value): void
     {
-        if (isset($this->data[$value]) && is_array($this->data[$value]) || $this->sometimes) {
-
-            return;
+        if (!$this->sometimes && (!isset($this->data[$value]) || !is_array($this->data[$value]))) {
+            $this->errors[] = "{$value} must be an array";
         }
 
-        $this->errors[] = "{$value} must be an array";
     }
 
     private function notBlank(string $value): void
     {
-        if (isset($this->data[$value]) && !empty($this->data[$value]) || $this->sometimes) {
-            return;
+        if (!$this->sometimes && (!isset($this->data[$value]) || empty($this->data[$value]))) {
+            $this->errors[] = "{$value} must be non-blank";
         }
-
-        $this->errors[] = "{$value} must be a non-blank";
     }
 
     public function sometimes(): void
